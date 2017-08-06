@@ -33,6 +33,7 @@ ALLOWED_HOSTS = ['*']
 INSTALLED_APPS = [
     'artsandideas.apps.ArtsAndIdeasConfig',
     'informals.apps.InformalsConfig',
+    'proshows.apps.ProshowsConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
