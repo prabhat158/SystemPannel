@@ -33,6 +33,7 @@ ALLOWED_HOSTS = ['*']
 INSTALLED_APPS = [
     'users.apps.UsersConfig',
     'artsandideas.apps.ArtsAndIdeasConfig',
+    'competitions.apps.CompetitionsConfig',
     'concerts.apps.ConcertsConfig',
     'informals.apps.InformalsConfig',
     'proshows.apps.ProshowsConfig',
