@@ -31,6 +31,7 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
+    'users.apps.UsersConfig',
     'artsandideas.apps.ArtsAndIdeasConfig',
     'concerts.apps.ConcertsConfig',
     'informals.apps.InformalsConfig',
