@@ -46,3 +46,12 @@ class Events(APIView):
             "Informals": informalserializer.data,
             "Arts and Ideas": artsandideaserializer.data
         })
+
+
+class Compireg(APIView):
+    def post(self, request, event_id, format=None):
+        return
+
+class UserCompetitions(APIView):
+    def get(self, request, fb_id, format=None):
+        return

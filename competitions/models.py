@@ -17,8 +17,8 @@ class CompetitionsEvent(models.Model):
     description = models.TextField()
     rules = models.TextField()
     prizes = models.TextField()
-    minparticipants = models.TextField(default=0)
-    maxparticipants = models.TextField(default=0)
+    minparticipants = models.IntegerField(default=0)
+    maxparticipants = models.IntegerField(default=0)
 
     def __str__(self):
         return self.name

@@ -1,4 +1,5 @@
 from django.db import models
+from competitions.models import CompetitionsEvent
 
 
 class City(models.Model):
@@ -73,4 +74,16 @@ class UserProfile(models.Model):
         self.mi_number = no
 
     def getName(self):
+        return self.name
+
+
+class Group(models.Model):
+
+    name = models.CharField(max_length=11)
+    event = models.ForeignKey(CompetitionsEvent,
+                              on_delete=models.CASCADE)
+    members = models.ManyToManyField(UserProfile,
+                                     blank=True)
+
+    def __str__(self):
         return self.name
