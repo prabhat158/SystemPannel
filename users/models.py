@@ -82,6 +82,13 @@ class Group(models.Model):
     name = models.CharField(max_length=11)
     event = models.ForeignKey(CompetitionsEvent,
                               on_delete=models.CASCADE)
+    mobile_number = models.IntegerField(blank=False)
+    present_city = models.ForeignKey(City,
+                                     on_delete=models.CASCADE,
+                                     null=True)
+    present_college = models.ForeignKey(College,
+                                        on_delete=models.CASCADE,
+                                        null=True)
     members = models.ManyToManyField(UserProfile,
                                      blank=True)
 

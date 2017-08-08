@@ -6,7 +6,7 @@ class CompetitionsEventSerializer(serializers.ModelSerializer):
     class Meta:
         model = CompetitionsEvent
         fields = ('name', 'description', 'rules', 'prizes',
-                  'minparticipants', 'maxparticipants')
+                  'id', 'minparticipants', 'maxparticipants')
 
 
 class CompetitionsGenreSerializer(serializers.ModelSerializer):

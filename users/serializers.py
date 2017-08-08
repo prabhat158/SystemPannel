@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import UserProfile, City, College
+from .models import UserProfile, City, College, Group
 
 
 class UserGetSerializer(serializers.ModelSerializer):
@@ -17,6 +17,12 @@ class UserGetSerializer(serializers.ModelSerializer):
         fields = ("name", "fb_id", "mi_number", "email", "mobile_number",
                   "present_city", "present_college",
                   "postal_address", "zip_code", "year_of_study")
+
+
+class GroupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Group
+        fields = "__all__"
 
 
 class UserSerializer(serializers.ModelSerializer):
