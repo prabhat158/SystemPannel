@@ -11,7 +11,6 @@ import unidecode
 class cities(APIView):
 
     def get(self, request, format=None):
-        print("hi")
         cities = City.objects.all().order_by('city_name')
         serializer = CitySerializer(cities, many=True)
         return Response(serializer.data)
@@ -62,17 +61,13 @@ class createuser(APIView):
         info = request.data
         try:
             info['present_city'] = City.objects.filter(city_name=info['present_city'])[0].id
-            print("city exists")
         except:
             info['present_city'] = City.objects.create(city_name=info['present_city']).id
-            print("new city")
         try:
             info['present_college'] = College.objects.filter(college_name=info['present_college'], located_city=int(info['present_city']))[0].id
-            print("college exists")
         except:
             Cityinstance = City.objects.filter(id=info['present_city'])[0]
             info['present_college'] = College.objects.create(college_name=info['present_college'], located_city=Cityinstance).id
-            print("new college")
 
         name = info['name']
         beg = giveFirstThree(name)
@@ -83,8 +78,6 @@ class createuser(APIView):
         else:
             end = str(101 + already_there)
         info['mi_number'] = beg + end
-
-        print(info)
 
         serializer = UserSerializer(data=info)
         if serializer.is_valid():
