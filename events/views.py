@@ -28,7 +28,7 @@ class Events(APIView):
         competitionsgenres = CompetitionsGenre.objects.all()
         proshowsgenres = ProshowsGenre.objects.all()
         workshopsgenres = WorkshopsGenre.objects.all()
-        concertsgenre = ConcertsGenre.objects.all()
+        concertsgenres = ConcertsGenre.objects.all()
         informalsgenres = InformalsGenre.objects.all()
         artsandideasgenres = ArtsAndIdeasGenre.objects.all()
 
@@ -38,7 +38,7 @@ class Events(APIView):
                                                     many=True)
         workshopserializer = WorkshopsGenreSerializer(workshopsgenres,
                                                       many=True)
-        concertserializer = ConcertsGenreSerializer(concertsgenre,
+        concertserializer = ConcertsGenreSerializer(concertsgenres,
                                                     many=True)
         informalserializer = InformalsGenreSerializer(informalsgenres,
                                                       many=True)
@@ -57,22 +57,7 @@ class Events(APIView):
 
 class Compireg(APIView):
     def post(self, request, event_id, format=None):
-        '''
-        participant = request.data['members']
-        event = CompetitionsEvent.objects.get(pk=event_id)
-        try:
-            group_leader = UserProfile.objects.get(mi_number=participant[0])
-        except:
-            return Response({"details": "MI Number invalid"},
-                            status=status.HTTP_400_BAD_REQUEST)
 
-        for user in participant:
-            try:
-                group.members.add(UserProfile.objects.get(mi_number=user))
-            except:
-                return Response({"details": "MI Number invalid"},
-                                status=status.HTTP_400_BAD_REQUEST)
-        '''
         info = request.data
         participant = info['applicants']
 

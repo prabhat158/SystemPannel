@@ -12,7 +12,7 @@ class CompetitionsGenre(models.Model):
 class CompetitionsEvent(models.Model):
     name = models.CharField(max_length=100)
     genre = models.ForeignKey(CompetitionsGenre,
-                              related_name='genres',
+                              related_name='events',
                               on_delete=models.CASCADE)
     description = models.TextField()
     rules = models.TextField()
