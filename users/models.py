@@ -37,15 +37,17 @@ class UserProfile(models.Model):
                                  unique=True,
                                  blank=False)
 
-    fb_id = models.IntegerField(unique=True,
-                                blank=False)
+    fb_id = models.CharField(max_length=30,
+                             unique=True,
+                             blank=False)
 
     email = models.EmailField(max_length=70,
                               unique=True,
                               blank=False)
 
-    mobile_number = models.IntegerField(unique=True,
-                                        blank=False)
+    mobile_number = models.CharField(max_length=10,
+                                     unique=True,
+                                     blank=False)
 
     # City and College
 
@@ -59,13 +61,19 @@ class UserProfile(models.Model):
 
     # Address
 
-    postal_address = models.CharField(max_length=100, blank=False)
+    postal_address = models.CharField(max_length=100,
+                                      blank=False)
 
     zip_code = models.IntegerField(blank=False)
 
-    # Year of study
+    # Year of study and birthdate
 
-    year_of_study = models.CharField(max_length=7, choices=YEAR_CHOICES)
+    dob = models.CharField(default="0",
+                           max_length=10,
+                           blank=False)
+
+    year_of_study = models.CharField(max_length=7,
+                                     choices=YEAR_CHOICES)
 
     def __str__(self):
         return self.name
@@ -82,7 +90,8 @@ class Group(models.Model):
     name = models.CharField(max_length=11)
     event = models.ForeignKey(CompetitionsEvent,
                               on_delete=models.CASCADE)
-    mobile_number = models.IntegerField(blank=False)
+    mobile_number = models.CharField(max_length=10,
+                                     blank=False)
     present_city = models.ForeignKey(City,
                                      on_delete=models.CASCADE,
                                      null=True)
