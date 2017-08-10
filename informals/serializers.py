@@ -5,7 +5,7 @@ from .models import InformalsEvent, InformalsGenre
 class InformalsEventSerializer(serializers.ModelSerializer):
     class Meta:
         model = InformalsEvent
-        fields = ('name', 'description')
+        fields = ('name', 'description', 'subtitle')
 
 
 class InformalsGenreSerializer(serializers.ModelSerializer):
@@ -13,4 +13,4 @@ class InformalsGenreSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = InformalsGenre
-        fields = ('name', 'description', 'events')
+        fields = ('name', 'description', 'events', 'image')

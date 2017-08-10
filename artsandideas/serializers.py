@@ -6,7 +6,7 @@ class ArtsAndIdeasEventSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ArtsAndIdeasEvent
-        fields = ('name', 'description')
+        fields = ('name', 'description', 'subtitle')
 
 
 class ArtsAndIdeasGenreSerializer(serializers.ModelSerializer):
@@ -14,4 +14,4 @@ class ArtsAndIdeasGenreSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ArtsAndIdeasGenre
-        fields = ('name', 'description', 'events')
+        fields = ('name', 'description', 'events', 'image')
