@@ -3,14 +3,14 @@ from competitions.models import CompetitionsEvent
 
 
 class City(models.Model):
-    city_name = models.CharField(max_length=20)
+    city_name = models.CharField(max_length=100)
 
     def __str__(self):
         return self.city_name
 
 
 class College(models.Model):
-    college_name = models.CharField(max_length=50)
+    college_name = models.CharField(max_length=300)
     located_city = models.ForeignKey(City, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -41,7 +41,7 @@ class UserProfile(models.Model):
                              unique=True,
                              blank=False)
 
-    email = models.EmailField(max_length=70,
+    email = models.EmailField(max_length=100,
                               unique=True,
                               blank=False)
 
@@ -101,5 +101,13 @@ class Group(models.Model):
     members = models.ManyToManyField(UserProfile,
                                      blank=True)
 
+    class Meta:
+        ordering = ['-id']
+
     def __str__(self):
-        return self.name
+        return self.members.get(mi_number=self.name).name
+
+    def get_mail(self):
+        return self.members.get(mi_number=self.name).email
+    get_mail.short_description = 'Email'
+    get_mail.admin_order_field = 'name'

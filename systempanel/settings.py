@@ -31,6 +31,7 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
+    'cl.apps.ClConfig',
     'news.apps.NewsConfig',
     'users.apps.UsersConfig',
     'artsandideas.apps.ArtsAndIdeasConfig',
@@ -40,6 +41,7 @@ INSTALLED_APPS = [
     'proshows.apps.ProshowsConfig',
     'workshops.apps.WorkshopsConfig',
     'events.apps.EventsConfig',
+    'livewire.apps.LivewireConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -89,7 +91,7 @@ WSGI_APPLICATION = 'systempanel.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'MI2k17',
+        'NAME': 'mi_2017',
         'USER': 'root',
         'PASSWORD': 'cooldude1',
         'HOST': '',
@@ -132,12 +134,13 @@ REST_FRAMEWORK = {
 }
 '''
 
+
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Calcutta'
 
 USE_I18N = True
 
@@ -149,6 +152,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
+PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+STATIC_ROOT = os.path.join(PROJECT_DIR, 'static')
 STATIC_URL = '/static/'
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = False

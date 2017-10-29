@@ -72,11 +72,14 @@ class createuser(APIView):
         name = info['name']
         beg = giveFirstThree(name)
         beg = "MI-" + beg + "-"
-        already_there = len(UserProfile.objects.filter(mi_number__startswith=beg))
+        already_there = len(UserProfile.objects.filter(mi_number__startswith=beg).order_by('-mi_number'))
         if already_there == 0:
             end = "101"
         else:
-            end = str(101 + already_there)
+            temp = UserProfile.objects.filter(mi_number__startswith=beg)
+            sortedtemp = sorted(temp, key=lambda UserProfile: int(UserProfile.mi_number[7:]))
+            sortedtemp.reverse()
+            end = str(int(sortedtemp[0].mi_number[7:]) + 1)
         info['mi_number'] = beg + end
 
         serializer = UserSerializer(data=info)

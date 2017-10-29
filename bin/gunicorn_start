@@ -1,0 +1,27 @@
+#!/bin/bash
+
+NAME="system_panel"
+DIR=/var/www/moodi.org/SystemPanel2k17
+USER=root
+WORKERS=3
+BIND=unix:/var/www/moodi.org/SystemPanel2k17/run/gunicorn.sock
+DJANGO_SETTINGS_MODULE=systempanel.settings
+DJANGO_WSGI_MODULE=systempanel.wsgi
+LOG_LEVEL=error
+TIMEOUT=1000
+
+cd $DIR
+cd /root/.virtualenvs/systempanel/bin/
+source activate
+cd $DIR
+
+export DJANGO_SETTINGS_MODULE=$DJANGO_SETTINGS_MODULE
+
+exec /root/.virtualenvs/systempanel/bin/gunicorn ${DJANGO_WSGI_MODULE}:application \
+  --name $NAME \
+    --user=$USER \
+      --timeout $TIMEOUT \
+        --workers=$WORKERS \
+          --bind=$BIND \
+            --log-level=$LOG_LEVEL \
+              --log-file=-

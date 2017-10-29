@@ -49,7 +49,7 @@ class Events(APIView):
             "Competitions": competitionserializer.data,
             "Proshows": proshowserializer.data,
             "Workshops": workshopserializer.data,
-            "Pronites": concertserializer.data,
+            "Concerts": concertserializer.data,
             "Informals": informalserializer.data,
             "Arts and Ideas": artsandideaserializer.data
         })
