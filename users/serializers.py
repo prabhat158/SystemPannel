@@ -16,7 +16,7 @@ class UserGetSerializer(serializers.ModelSerializer):
         model = UserProfile
         fields = ("name", "fb_id", "mi_number", "email", "mobile_number",
                   "present_city", "present_college",
-                  "postal_address", "zip_code", "year_of_study")
+                  "postal_address", "zip_code", "year_of_study","get_cl_name","get_cl_mail","get_cl_number")
 
 
 class GroupSerializer(serializers.ModelSerializer):

@@ -12,7 +12,7 @@ class City(models.Model):
 class College(models.Model):
     college_name = models.CharField(max_length=300)
     located_city = models.ForeignKey(City, on_delete=models.CASCADE)
-
+    assignedcl = models.ForeignKey('UserProfile', blank = True, null = True)
     def __str__(self):
         return self.college_name
 
@@ -83,6 +83,29 @@ class UserProfile(models.Model):
 
     def getName(self):
         return self.name
+
+    def get_cl_name(self):
+        cl = self.present_college.assignedcl
+        if(cl is None):
+            return None
+        else:
+            return cl.name
+    get_cl_name.short_description = u"CL"
+
+    def get_cl_mail(self):
+        cl = self.present_college.assignedcl
+        if(cl is None):
+            return None
+        else:
+            return cl.email
+    get_cl_name.short_description = u"CL mail"
+    def get_cl_number(self):
+        cl = self.present_college.assignedcl
+        if(cl is None):
+            return None
+        else:
+            return cl.mobile_number
+    get_cl_name.short_description = u"CL number"
 
 
 class Group(models.Model):
