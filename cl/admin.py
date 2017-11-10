@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import ContingentLeader, Contingent
+from .models import ContingentLeader, Contingent, ContingentMember#, Contingent
 from django.http import HttpResponse
 
 def export_csv(modeladmin, request, queryset):
@@ -61,3 +61,4 @@ class ContingentLeaderAdmin(admin.ModelAdmin):
 # Register your models here.
 admin.site.register(ContingentLeader, ContingentLeaderAdmin)
 admin.site.register(Contingent)
+admin.site.register(ContingentMember)
