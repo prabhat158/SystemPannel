@@ -112,6 +112,18 @@ class Contingent(models.Model):
     get_cl_name.short_description = u"Name"
     get_cl_name.admin_order_field = 'cl__name'
 
+
+    def get_cl_mi_number(self):
+        return self.cl.mi_number
+    get_cl_mi_number.short_description = u"UserName"
+    get_cl_mi_number.admin_order_field = 'cl__mi_number'
+
+
+    def get_cl_pass(self):
+        return self.cl.fb_id
+    get_cl_pass.short_description = u"Password"
+    get_cl_pass.admin_order_field = 'cl__fb_id'
+
     def get_cl_college(self):
         return self.cl.present_college.college_name
     get_cl_college.short_description = u"College"
@@ -120,4 +132,7 @@ class Contingent(models.Model):
     def get_cl_city(self):
         return self.cl.present_city.city_name
     get_cl_city.short_description = u"City"
-    get_cl_city.admin_order_field = 'cl__present_city__city_name'  
+    get_cl_city.admin_order_field = 'cl__present_city__city_name'
+
+    def get_members(self):
+        return "\n".join([p.profile.name+' '+str(p.is_selected)+' '+str(p.has_paid)+' '+str(p.is_imp) for p in self.contingent_members.all()])  

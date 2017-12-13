@@ -13,7 +13,7 @@ class WorkshopsGenre(models.Model):
 class WorkshopsEvent(models.Model):
     name = models.CharField(max_length=100)
     genre = models.ForeignKey(WorkshopsGenre,
-                              related_name='genres',
+                              related_name='events',
                               on_delete=models.CASCADE)
     description = models.TextField()
     subtitle = models.CharField(max_length=100)

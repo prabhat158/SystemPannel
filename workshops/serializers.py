@@ -6,7 +6,7 @@ class WorkshopsEventSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = WorkshopsEvent
-        fields = ('name', 'description', 'subtitle')
+        fields = ('id','name', 'description', 'subtitle')
 
 
 class WorkshopsGenreSerializer(serializers.ModelSerializer):

@@ -11,16 +11,16 @@ from informals.serializers import InformalsGenreSerializer
 from artsandideas.serializers import ArtsAndIdeasGenreSerializer
 
 from competitions.serializers import CompetitionsEventSerializer
-from users.serializers import GroupSerializer
+from users.serializers import GroupSerializer, WorkshopParticipantSerializer
 
 from competitions.models import CompetitionsGenre, CompetitionsEvent
 from proshows.models import ProshowsGenre
-from workshops.models import WorkshopsGenre
+from workshops.models import WorkshopsGenre, WorkshopsEvent
 from concerts.models import ConcertsGenre
 from informals.models import InformalsGenre
 from artsandideas.models import ArtsAndIdeasGenre
 
-from users.models import UserProfile
+from users.models import UserProfile, WorkshopParticipant
 
 
 class Events(APIView):
@@ -91,6 +91,46 @@ class Compireg(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class Workshopreg(APIView):
+    def post(self, request, event_id, format=None):
+
+        info = request.data
+        applicant = info['applicant']
+
+        try:
+            info['event'] = WorkshopsEvent.objects.get(pk=event_id).id
+        except:
+            return Response({"details": "Event invalid"},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            u = UserProfile.objects.get(mi_number=applicant)
+            info['participant'] = u.id
+        except:
+            return Response({"details": "MI Number invalid"},
+                            status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            w = WorkshopParticipant.objects.filter(participant=u)
+            for t in w:
+                if t.event.id == info['event']:
+                    return Response({"details": "Exists"},
+                            status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            print(e)
+            serializer = WorkshopParticipantSerializer(data=info)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer = WorkshopParticipantSerializer(data=info)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 class UserCompetitions(APIView):

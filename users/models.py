@@ -1,5 +1,6 @@
 from django.db import models
 from competitions.models import CompetitionsEvent
+from workshops.models import WorkshopsEvent
 
 
 class City(models.Model):
@@ -134,3 +135,11 @@ class Group(models.Model):
         return self.members.get(mi_number=self.name).email
     get_mail.short_description = 'Email'
     get_mail.admin_order_field = 'name'
+
+class WorkshopParticipant(models.Model):
+    participant = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    event = models.ForeignKey(WorkshopsEvent, on_delete=models.CASCADE)
+    class Meta:
+        ordering = ['-id']
+    def __str__(self):
+        return self.participant.name

@@ -126,9 +126,82 @@ class selectmembers(APIView):
                 member.is_selected = 0
                 member.save()
         contingent.selected_contingent_strength = len(members)
+        if(contingent.selected_contingent_strength == contingent.strength_alloted):
+            contingent.is_equal = 1
+        else:
+            contingent.is_equal = 0
         contingent.save()
         return Response({"details": "Success"},
                         status=status.HTTP_200_OK)
+
+
+class approvedminumbers(APIView):
+    def get_object(self, fb_id):
+        try:
+            return UserProfile.objects.get(mi_number=fb_id)
+        except UserProfile.DoesNotExist:
+            raise Http404
+
+    def get_member(self, userprofile):
+        try:
+            print('exists')
+            return ContingentMember.objects.get(profile=userprofile)
+        except ContingentMember.DoesNotExist:
+            raise Http404
+
+    def get(self, request, mi_number, format=None):
+        user = self.get_object(mi_number)
+        member = self.get_member(user)
+        if member.is_selected==1:
+            return Response({"detail":True})
+        else:
+            return Response({"detail":False})
+
+class updatepaidlist(APIView):
+    def get_object(self, fb_id):
+        try:
+            return UserProfile.objects.get(mi_number=fb_id)
+        except UserProfile.DoesNotExist:
+            raise Http404
+
+    def get_member(self, userprofile):
+        try:
+            print('exists')
+            return ContingentMember.objects.get(profile=userprofile)
+        except ContingentMember.DoesNotExist:
+            raise Http404
+
+    def post(self, request, format=None):
+        info = request.data
+        print(info)
+        if(isinstance(info, list)):
+            print("list")
+            for instance in info:
+                mi_number = instance["answerList"][0]["answer"]
+                user = self.get_object(mi_number)
+                member = self.get_member(user)
+                member.has_paid = 1
+                member.save()
+            return Response({"detail":"Success"})
+        else:
+            print("single")
+            mi_number = info["answerList"][0]["answer"]
+            user = self.get_object(mi_number)
+            member = self.get_member(user)
+            member.has_paid = 1
+            member.save()
+            return Response({"detail":"Success"})
+        '''
+        contingents = Contingent.objects.filter(status=3)
+        
+        #serializer = ApprovedSerializer(contingents, many=True)
+        info = {}
+        info['mi_numbers']=[]
+        for contingent in contingents:
+            for member in contingent.contingent_members.all():
+                info['mi_numbers'].append(member.mi_number)
+        '''
+
 '''
     def put(self, request, fb_id, format=None):
         user = self.get_object(fb_id)
