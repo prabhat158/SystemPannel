@@ -183,7 +183,7 @@ class my_team(APIView):
                 return team
             except Group.DoesNotExist:
                 raise Http404
-        except User.DoesNotExist
+        except User.DoesNotExist:
             raise Http404
 
 
