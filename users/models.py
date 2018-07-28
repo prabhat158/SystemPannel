@@ -46,6 +46,8 @@ class UserProfile(models.Model):
                               unique=True,
                               blank=False)
 
+    cr_referral_code=models.CharField(max_length=7, null=True)
+
     mobile_number = models.CharField(max_length=10,
                                      unique=True,
                                      blank=False)
@@ -75,6 +77,8 @@ class UserProfile(models.Model):
 
     year_of_study = models.CharField(max_length=7,
                                      choices=YEAR_CHOICES)
+
+    checkedin = models.IntegerField(default=0)
 
     def __str__(self):
         return self.name
@@ -111,7 +115,7 @@ class UserProfile(models.Model):
 
 class Group(models.Model):
 
-    name = models.CharField(max_length=11)
+    #name = models.CharField(max_length=11)
     event = models.ForeignKey(CompetitionsEvent,
                               on_delete=models.CASCADE)
     mobile_number = models.CharField(max_length=10,
@@ -124,6 +128,7 @@ class Group(models.Model):
                                         null=True)
     members = models.ManyToManyField(UserProfile,
                                      blank=True)
+    leader = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
 
     class Meta:
         ordering = ['-id']

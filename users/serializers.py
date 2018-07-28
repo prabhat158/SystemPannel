@@ -20,6 +20,19 @@ class UserGetSerializer(serializers.ModelSerializer):
 
 
 class GroupSerializer(serializers.ModelSerializer):
+    present_city = serializers.SlugRelatedField(
+        slug_field='city_name',
+        read_only=True
+    )
+    present_college = serializers.SlugRelatedField(
+        slug_field='college_name',
+        read_only=True
+    )
+    leader = serializers.SlugRelatedField(
+        slug_field='mi_number',
+        read_only=True
+    )
+    members = UserSerializer(read_only=True, many=True)
     class Meta:
         model = Group
         fields = "__all__"

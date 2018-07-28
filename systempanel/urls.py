@@ -23,4 +23,6 @@ urlpatterns = [
     url(r'^', include('news.urls')),
     url(r'^', include('livewire.urls')),
     url(r'^', include('cl.urls')),
+    url(r'^', include('schedule.urls')),
+    url(r'^', include('results.urls')),
 ]

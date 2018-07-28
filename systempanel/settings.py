@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     'workshops.apps.WorkshopsConfig',
     'events.apps.EventsConfig',
     'livewire.apps.LivewireConfig',
+    'schedule.apps.ScheduleConfig',
+    'results.apps.ResultsConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -91,9 +93,9 @@ WSGI_APPLICATION = 'systempanel.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'mi_2017',
+        'NAME': 'mi_name',
         'USER': 'root',
-        'PASSWORD': 'cooldude1',
+        'PASSWORD': 'arsh',
         'HOST': '',
         'PORT': '',
     }

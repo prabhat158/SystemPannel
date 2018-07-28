@@ -42,13 +42,22 @@ def export_csv(modeladmin, request, queryset):
 
 export_csv.short_description = u"Export CSV"
 
+def checkin(modeladmin, request, queryset):
+    print (queryset)
+    for q in queryset:
+        q.checkedin = 1
+        q.save()
+
+checkin.short_description = u"Check In"
+
 class UserProfileAdmin(admin.ModelAdmin):
-    list_display = ('name', 'mobile_number', 'present_college', 'present_city')
+    list_display = ('name', 'mobile_number', 'present_college', 'present_city', 'checkedin')
     search_fields = ['name',
                      'present_city__city_name',
                      'present_college__college_name']
     list_filter = ['present_city',
                    'present_college']
+    actions = (checkin,)
 
 
 class MembersInline(admin.TabularInline):
