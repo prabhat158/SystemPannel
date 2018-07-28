@@ -198,8 +198,8 @@ class add_member(APIView):
                 team = Group.objects.filter(leader_mi_number=User.mi_number, event_name=info["compi_name"])
                 try:
                     #checking if the member exist in any other team or is a leader in other group
-                    if !(Group.objects.filter(members__mi_number=info['member_number'], event_name=info["compi_name"]).count()+Group.objects.filter(leader_mi_number=info['member_number'], event_name=info["compi_name"]).count())
-                        New_member=UserProfile.objects.filter(mi_number=info['member_number'])
+                    if !(Group.objects.filter(members__mi_number=info["member_number"], event_name=info["compi_name"]).count()+Group.objects.filter(leader_mi_number=info["member_number"], event_name=info["compi_name"]).count())
+                        New_member=UserProfile.objects.filter(mi_number=info["member_number"])
                         team.memebers.add(New_member)
                         Team
                         return team
@@ -236,12 +236,12 @@ class exit_team(APIView):
 class create_team(APIView):
     def post(self, request, fb_id):
         info = request.data
-        user = info['user']
+        user = info["user"]
         try:
             leader = UserProfile.objects.filter(fb_id=fb_id)
-            event = CompetitionsEvent.objects.filter(name=info['event_name'])
-            my_team = Group.objects.create(name=info['team']['name'], mobile_number=user['mobile_number'], event=event,
-                present_city=user['present_city'], present_college=user['present_college'],
+            event = CompetitionsEvent.objects.filter(name=info["event_name"])
+            my_team = Group.objects.create(name=info["team"]["name"], mobile_number=user["mobile_number"], event=event,
+                present_city=user["present_city"], present_college=user["present_college"],
                 leader=leader)
 
             Team = GroupSerializer(my_team)
