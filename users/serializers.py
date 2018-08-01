@@ -19,6 +19,12 @@ class UserGetSerializer(serializers.ModelSerializer):
                   "postal_address", "zip_code", "year_of_study","get_cl_name","get_cl_mail","get_cl_number")
 
 
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields = "__all__"
+
+
 class GroupSerializer(serializers.ModelSerializer):
     present_city = serializers.SlugRelatedField(
         slug_field='city_name',
@@ -38,10 +44,6 @@ class GroupSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = UserProfile
-        fields = "__all__"
 
 
 class CitySerializer(serializers.ModelSerializer):
