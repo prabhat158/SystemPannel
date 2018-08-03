@@ -127,8 +127,8 @@ class Group(models.Model):
                                         on_delete=models.CASCADE,
                                         null=True)
     members = models.ManyToManyField(UserProfile,
-                                     blank=True)
-    leader = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+                                     blank=True, related_name='members')
+    leader = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='leader')
 
     class Meta:
         ordering = ['-id']

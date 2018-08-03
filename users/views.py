@@ -174,13 +174,15 @@ class aid(APIView):
 
 
 class my_team(APIView):
-    info = request.data
+    
     def get(self, request, fb_id, format=None):
+        info = request.data
         try:
             User = UserProfile.objects.filter(fb_id=fb_id)
             try:
-                team = Group.objects.filter(members__mi_number=User.mi_number, event_name=info["event_name"])
-                return team
+                team = Group.objects.filter(members__mi_number=User.mi_number).filter(event_name=info["event_name"])
+                serializer = GroupSerializer(team)
+                return serializer
             except Group.DoesNotExist:
                 raise Http404
         except User.DoesNotExist:
@@ -198,11 +200,13 @@ class add_member(APIView):
                 team = Group.objects.filter(leader_mi_number=User.mi_number, event_name=info["compi_name"])
                 try:
                     #checking if the member exist in any other team or is a leader in other group
-                    if !(Group.objects.filter(members__mi_number=info["member_number"], event_name=info["compi_name"]).count()+Group.objects.filter(leader_mi_number=info["member_number"], event_name=info["compi_name"]).count())
+                    member_present = Group.objects.filter(members__mi_number=info['member_number']).filter(event_name=info["compi_name"]).count()
+                    leader_present = Group.objects.filter(leader_mi_number=info['member_number']).filter(event_name=info["compi_name"]).count()
+                    if member_present+leader_present>0:
                         New_member=UserProfile.objects.filter(mi_number=info["member_number"])
                         team.memebers.add(New_member)
-                        Team
-                        return team
+                        serializer = GroupSerializer(team)
+                        return serializer
                     raise Http404
                 except UserProfile.DoesNotExist:
                     raise Http404
@@ -215,7 +219,7 @@ class is_leader(APIView):
     def get(self, request, fb_id, format=None):
         info = request.data
         try:
-            Team = Group.objects.filter(event_name=info["event_name"], leader_mi_number=info["mi_number"])
+            Team = Group.objects.filter(event_name=info["event_name"]).filter(leader_mi_number=info["mi_number"])
             return True
         except Group.DoesNotExist:
             return False
@@ -226,9 +230,11 @@ class exit_team(APIView):
         info = request.data
         try:
             #finding out if the member belongs to a team
-            team = Group.objects.filter(memebers__mi_number=info["mi_number"], event_name=info["compi_name"])
+            team = Group.objects.filter(memebers__mi_number=info["mi_number"]).filter(event_name=info["compi_name"])
             User = UserProfile.objects.filter(mi_number=info["mi_number"])
             team.members.remove(User)
+            serializer = GroupSerializer(team)
+            return serializer
         except Group.DoesNotExist:
             raise Http404
 
