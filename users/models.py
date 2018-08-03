@@ -13,7 +13,7 @@ class City(models.Model):
 class College(models.Model):
     college_name = models.CharField(max_length=300)
     located_city = models.ForeignKey(City, on_delete=models.CASCADE)
-    assignedcl = models.ForeignKey('UserProfile', blank = True, null = True)
+    assignedcl = models.ForeignKey('UserProfile', blank = True, null = True, on_delete=models.CASCADE)
     def __str__(self):
         return self.college_name
 
