@@ -1,6 +1,7 @@
 from .models import UserProfile, City, College, Group
 from .serializers import UserGetSerializer, UserSerializer
 from .serializers import CitySerializer, CollegeSerializer, GroupSerializer
+from django.shortcuts import get_list_or_404, get_object_or_404
 from competitions.models import CompetitionsEvent
 from django.http import Http404
 from rest_framework.views import APIView
@@ -32,27 +33,27 @@ class colleges(APIView):
 
 
 class getuser(APIView):
-    def get_object(self, fb_id):
+    def get_object(self, google_id):
         try:
-            return UserProfile.objects.get(fb_id=fb_id)
+            return UserProfile.objects.get(google_id=google_id)
         except UserProfile.DoesNotExist:
             raise Http404
 
-    def get(self, request, fb_id, format=None):
-        user = self.get_object(fb_id)
+    def get(self, request, google_id, format=None):
+        user = self.get_object(google_id)
         serializer = UserGetSerializer(user)
         return Response(serializer.data)
 
 
 class check(APIView):
-    def get_object(self, fb_id):
+    def get_object(self, google_id):
         try:
-            return UserProfile.objects.get(fb_id=fb_id)
+            return UserProfile.objects.get(google_id=google_id)
         except UserProfile.DoesNotExist:
             raise Http404
 
-    def get(self, request, fb_id, format=None):
-        user = self.get_object(fb_id)
+    def get(self, request, google_id, format=None):
+        user = self.get_object(google_id)
         user.checkedin = 1
         user.save()
         serializer = UserGetSerializer(user)
@@ -77,16 +78,17 @@ class createuser(APIView):
     def post(self, request, format=None):
         info = request.data
         try:
-            info['present_city'] = City.objects.filter(city_name=info['present_city'])[0].id
+            info['present_city'] = City.objects.filter(city_name=info.get('present_city'))[0].id
         except:
-            info['present_city'] = City.objects.create(city_name=info['present_city']).id
+            city = City.objects.create(city_name=info.get('present_city'))
+            info['present_city'] = city.id
         try:
-            info['present_college'] = College.objects.filter(college_name=info['present_college'], located_city=int(info['present_city']))[0].id
+            info['present_college'] = College.objects.filter(college_name=info.get('present_college'), located_city=int(info['present_city']))[0].id
         except:
             Cityinstance = City.objects.filter(id=info['present_city'])[0]
-            info['present_college'] = College.objects.create(college_name=info['present_college'], located_city=Cityinstance).id
+            info['present_college'] = College.objects.create(college_name=info.get('present_college'), located_city=Cityinstance).id
 
-        name = info['name']
+        name = info.get('name')
         beg = giveFirstThree(name)
         beg = "MI-" + beg + "-"
         already_there = len(UserProfile.objects.filter(mi_number__startswith=beg).order_by('-mi_number'))
@@ -99,10 +101,10 @@ class createuser(APIView):
             end = str(int(sortedtemp[0].mi_number[7:]) + 1)
         info['mi_number'] = beg + end
         #increase CR's score if any
-        URL = "https://api.moodi.org/my_cr/"
-        data = {'referral_code':info['cr_referral_code']}
-        r = requests.post(URL, data=data)
-        print(r.json())
+        #URL = "https://api.moodi.org/my_cr/"
+        #data = {'referral_code':info['cr_referral_code']}
+        #r = requests.post(URL, data=data)
+        #print(r.json())
 
         serializer = UserSerializer(data=info)
         if serializer.is_valid():
@@ -112,7 +114,7 @@ class createuser(APIView):
 
         '''
         try:
-            new_user = UserProfile.objects.create(name=request.data['name'], postal_address=request.data['postal_address'], mobile_number=request.data['mobile_number'], whatsapp_number=request.data['whatsapp_number'], zip_code=request.data['zip_code'], year_of_study=request.data['year_of_study'], fb_id=request.data['fb_id'], email=request.data['email'], present_city=city, present_college=college, mi_number=(beg+"-"+end))
+            new_user = UserProfile.objects.create(name=request.data['name'], postal_address=request.data['postal_address'], mobile_number=request.data['mobile_number'], whatsapp_number=request.data['whatsapp_number'], zip_code=request.data['zip_code'], year_of_study=request.data['year_of_study'], google_id=request.data['google_id'], email=request.data['email'], present_city=city, present_college=college, mi_number=(beg+"-"+end))
             print new_user
             return Response({"details":"Successful!"}, status=status.HTTP_201_CREATED)
         except:
@@ -175,76 +177,80 @@ class aid(APIView):
 
 class my_team(APIView):
     
-    def get(self, request, fb_id, format=None):
-        info = request.data
-        try:
-            User = UserProfile.objects.filter(fb_id=fb_id)
-            try:
-                team = Group.objects.filter(members__mi_number=User.mi_number).filter(event_name=info["event_name"])
-                serializer = GroupSerializer(team)
-                return serializer
-            except Group.DoesNotExist:
-                raise Http404
-        except User.DoesNotExist:
-            raise Http404
+    def get(self, request, google_id, format=None):
+        info = request.GET
+
+        # Get the profile of the user if exists
+        user = get_object_or_404(UserProfile.objects, google_id=google_id)
+
+        # Get all groups if event is not specified
+        if "event" not in info or not info["event"]:
+            return Response(GroupSerializer(Group.objects.filter(members__mi_number=user.mi_number), many=True).data)
+
+        # Get particular group when event is specified
+        team = get_object_or_404(Group.objects, members__mi_number=user.mi_number, event__id=info["event"])
+        serializer = GroupSerializer(team)
+        return Response(serializer.data)
 
 
 class add_member(APIView):
     """docstring for createteam"""
-    def post(self, request, fb_id):
+    def post(self, request, google_id):
         info = request.data
-        try:
-            User = UserProfile.objects.filter(fb_id=fb_id)
-            try:
-                #checking if the request is made by a leader
-                team = Group.objects.filter(leader_mi_number=User.mi_number, event_name=info["compi_name"])
-                try:
-                    #checking if the member exist in any other team or is a leader in other group
-                    member_present = Group.objects.filter(members__mi_number=info['member_number']).filter(event_name=info["compi_name"]).count()
-                    leader_present = Group.objects.filter(leader_mi_number=info['member_number']).filter(event_name=info["compi_name"]).count()
-                    if member_present+leader_present>0:
-                        New_member=UserProfile.objects.filter(mi_number=info["member_number"])
-                        team.memebers.add(New_member)
-                        serializer = GroupSerializer(team)
-                        return serializer
-                    raise Http404
-                except UserProfile.DoesNotExist:
-                    raise Http404
-            except Group.DoesNotExist:
-                raise Http404
-        except UserProfile.DoesNotExist:
-            raise Http404
+
+        # Get user object
+        user = get_object_or_404(UserProfile.objects, google_id=google_id)
+
+        # checking if the request is made by a leader
+        team = get_object_or_404(Group.objects, leader__mi_number=user.mi_number, event__id=info["event_id"])
+
+        # checking if the member exist in any other team or is a leader in other group
+        member_present = Group.objects.filter(members__mi_number=info['member_number']).filter(event__id=info["event_id"]).exists()
+        leader_present = Group.objects.filter(leader__mi_number=info['member_number']).filter(event__id=info["event_id"]).exists()
+
+        # Add a new member if all is okay
+        if not member_present and not leader_present:
+            new_member = get_object_or_404(UserProfile.objects, mi_number=info["member_number"])
+            team.members.add(new_member)
+            team.save()
+            serializer = GroupSerializer(team)
+            return Response(serializer.data)
+        raise Http404
 
 class is_leader(APIView):
-    def get(self, request, fb_id, format=None):
-        info = request.data
-        try:
-            Team = Group.objects.filter(event_name=info["event_name"]).filter(leader_mi_number=info["mi_number"])
-            return True
-        except Group.DoesNotExist:
-            return False
+    def get(self, request, google_id, format=None):
+        info = request.GET
+        return Response({
+            "response": Group.objects.filter(
+                event__id=info["event"],
+                leader__google_id=google_id
+            ).exists()})
         
 class exit_team(APIView):
 
-    def post(self, request):
+    def post(self, request, google_id):
         info = request.data
-        try:
-            #finding out if the member belongs to a team
-            team = Group.objects.filter(memebers__mi_number=info["mi_number"]).filter(event_name=info["compi_name"])
-            User = UserProfile.objects.filter(mi_number=info["mi_number"])
-            team.members.remove(User)
-            serializer = GroupSerializer(team)
-            return serializer
-        except Group.DoesNotExist:
-            raise Http404
 
+        # finding out if the member belongs to a team
+        user = get_object_or_404(UserProfile.objects, mi_number=info["mi_number"])
+        team = get_object_or_404(Group.objects, members__mi_number=info["mi_number"], event__id=info["event_id"])
+
+        # User can remove if leader OR self
+        if team.leader.google_id == google_id or user.google_id == google_id:
+            # Remove the member from the team
+            team.members.remove(user)
+            team.save()
+            serializer = GroupSerializer(team)
+            return Response(serializer.data)
+        else:
+            return Response({"detail": "forbidden"}, status=403)
 
 class create_team(APIView):
-    def post(self, request, fb_id):
+    def post(self, request, google_id):
         info = request.data
         user = info["user"]
         try:
-            leader = UserProfile.objects.filter(fb_id=fb_id)
+            leader = UserProfile.objects.filter(google_id=google_id)
             event = CompetitionsEvent.objects.filter(name=info["event_name"])
             my_team = Group.objects.create(name=info["team"]["name"], mobile_number=user["mobile_number"], event=event,
                 present_city=user["present_city"], present_college=user["present_college"],

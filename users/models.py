@@ -38,7 +38,7 @@ class UserProfile(models.Model):
                                  unique=True,
                                  blank=False)
 
-    fb_id = models.CharField(max_length=30,
+    google_id = models.CharField(max_length=30,
                              unique=True,
                              blank=False)
 
@@ -115,7 +115,7 @@ class UserProfile(models.Model):
 
 class Group(models.Model):
 
-    #name = models.CharField(max_length=11)
+    name = models.CharField(max_length=11)
     event = models.ForeignKey(CompetitionsEvent,
                               on_delete=models.CASCADE)
     mobile_number = models.CharField(max_length=10,
@@ -134,7 +134,7 @@ class Group(models.Model):
         ordering = ['-id']
 
     def __str__(self):
-        return self.members.get(mi_number=self.name).name
+        return self.name + ' - ' + self.leader.mi_number
 
     def get_mail(self):
         return self.members.get(mi_number=self.name).email

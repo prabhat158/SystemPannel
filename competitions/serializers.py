@@ -5,7 +5,7 @@ from .models import CompetitionsEvent, CompetitionsGenre
 class CompetitionsEventSerializer(serializers.ModelSerializer):
     class Meta:
         model = CompetitionsEvent
-        fields = ('name', 'description', 'rules', 'prizes', 'subtitle',
+        fields = ('name', 'LYP_description', 'LYP_logo', 'description', 'rules', 'prizes', 'subtitle',
                   'id', 'minparticipants', 'maxparticipants')
 
 

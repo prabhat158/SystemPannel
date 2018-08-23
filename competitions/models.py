@@ -15,6 +15,8 @@ class CompetitionsEvent(models.Model):
     genre = models.ForeignKey(CompetitionsGenre,
                               related_name='events',
                               on_delete=models.CASCADE)
+    LYP_description = models.TextField()
+    LYP_logo = models.ImageField(upload_to='photos/', blank=True)
     description = models.TextField()
     rules = models.TextField()
     prizes = models.TextField()

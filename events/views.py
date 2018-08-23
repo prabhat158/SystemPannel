@@ -134,14 +134,14 @@ class Workshopreg(APIView):
 
 
 class UserCompetitions(APIView):
-    def get_object(self, fb_id):
+    def get_object(self, google_id):
         try:
-            return UserProfile.objects.get(fb_id=fb_id)
+            return UserProfile.objects.get(google_id=google_id)
         except UserProfile.DoesNotExist:
             raise Http404
 
-    def get(self, request, fb_id, format=None):
-        user = self.get_object(fb_id)
+    def get(self, request, google_id, format=None):
+        user = self.get_object(google_id)
         temp = []
         for group in user.group_set.all():
             if(group.event not in temp):

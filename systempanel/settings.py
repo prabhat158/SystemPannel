@@ -31,9 +31,9 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
+    'users.apps.UsersConfig',
     'cl.apps.ClConfig',
     'news.apps.NewsConfig',
-    'users.apps.UsersConfig',
     'artsandideas.apps.ArtsAndIdeasConfig',
     'competitions.apps.CompetitionsConfig',
     'concerts.apps.ConcertsConfig',
@@ -89,13 +89,13 @@ WSGI_APPLICATION = 'systempanel.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
-
+'''
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'mi_name',
+        'NAME': 'mi_2018',
         'USER': 'root',
-        'PASSWORD': 'arsh',
+        'PASSWORD': 'pratik123',
         'HOST': '',
         'PORT': '',
     }
@@ -109,7 +109,7 @@ DATABASES = {
     }
 }
 
-'''
+#'''
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
 
