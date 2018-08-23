@@ -248,15 +248,27 @@ class exit_team(APIView):
 class create_team(APIView):
     def post(self, request, google_id):
         info = request.data
-        user = info["user"]
-        try:
-            leader = UserProfile.objects.filter(google_id=google_id)
-            event = CompetitionsEvent.objects.filter(name=info["event_name"])
-            my_team = Group.objects.create(name=info["team"]["name"], mobile_number=user["mobile_number"], event=event,
-                present_city=user["present_city"], present_college=user["present_college"],
+
+        # Get objects
+        leader = get_object_or_404(UserProfile.objects, google_id=google_id)
+        event  = get_object_or_404(CompetitionsEvent.objects, id=info["event_id"])
+
+        # Check if already present in a team
+        if Group.objects.filter(members__mi_number=leader.mi_number, event=event).exists():
+            return Response({"detail": "User already present in another group"}, status=403)
+
+        # Check if leading another team
+        if Group.objects.filter(leader=leader, event=event).exists():
+            return Response({"detail": "User already leads another group"}, status=403)
+
+        # Create a team
+        my_team = Group.objects.create(
+                name=info["team_name"],
+                mobile_number=leader.mobile_number,
+                event=event,
+                present_city=leader.present_city,
+                present_college=leader.present_college,
                 leader=leader)
 
-            Team = GroupSerializer(my_team)
-            return Team
-        except UserProfile.DoesNotExist:
-            raise Http404    
+        return Response(GroupSerializer(my_team).data)
+
