@@ -14,8 +14,8 @@ class UserGetSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserProfile
-        fields = ("name", "google_id", "mi_number", "email", "mobile_number",
-                  "present_city", "present_college",
+        fields = ("name", "google_id", "mi_number", "email", "mobile_number","gender",
+                  "present_city", "present_college","permanent_address",
                   "postal_address", "zip_code", "year_of_study","get_cl_name","get_cl_mail","get_cl_number")
 
 
@@ -39,7 +39,7 @@ class GroupSerializer(serializers.ModelSerializer):
         slug_field='mi_number',
         read_only=True
     )
-    members = UserSerializer(read_only=True, many=True)
+    members = UserGetSerializer(read_only=True, many=True)
 
     class Meta:
         model = Group

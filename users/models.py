@@ -46,7 +46,7 @@ class UserProfile(models.Model):
                               unique=True,
                               blank=False)
 
-    cr_referral_code=models.CharField(max_length=7, null=True)
+    cr_referral_code=models.CharField(max_length=7, null=True, blank=True)
 
     mobile_number = models.CharField(max_length=10,
                                      unique=True,
@@ -66,8 +66,10 @@ class UserProfile(models.Model):
 
     postal_address = models.CharField(max_length=100,
                                       blank=False)
+    permanent_address = models.CharField(max_length=200, blank=False, default='NULL')
 
     zip_code = models.IntegerField(blank=False)
+    gender = models.CharField(blank=False, default='NULL', max_length=7)
 
     # Year of study and birthdate
 
@@ -115,7 +117,7 @@ class UserProfile(models.Model):
 
 class Group(models.Model):
 
-    name = models.CharField(max_length=11)
+    name = models.CharField(max_length=600)
     event = models.ForeignKey(CompetitionsEvent,
                               on_delete=models.CASCADE)
     mobile_number = models.CharField(max_length=10,
@@ -127,9 +129,9 @@ class Group(models.Model):
                                         on_delete=models.CASCADE,
                                         null=True)
     members = models.ManyToManyField(UserProfile,
-                                     blank=True, related_name='members')
+                                     blank=True, null=True,  related_name='members')
     leader = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='leader')
-
+    multicity = models.CharField(max_length=20, blank=True, null=True)
     class Meta:
         ordering = ['-id']
 

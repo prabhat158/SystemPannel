@@ -25,4 +25,5 @@ urlpatterns = [
     url(r'^', include('cl.urls')),
     url(r'^', include('schedule.urls')),
     url(r'^', include('results.urls')),
+    url(r'^', include('imagica.urls')),
 ]

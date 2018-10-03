@@ -11,23 +11,26 @@ def export_csv(modeladmin, request, queryset):
     response.write(u'\ufeff'.encode('utf8'))
     writer.writerow([
         smart_str(u"Id"),
-        smart_str(u"Name"),
+        smart_str(u"MI-numbers"),
+        smart_str(u"Leader/Member's Name"),
         smart_str(u"Email"),
         smart_str(u"Mobile Number"),
         smart_str(u"College"),
         smart_str(u"City"),
         smart_str(u"Event"),
+        smart_str(u"Multicity"),
     ])
     for obj in queryset:
         writer.writerow([
             smart_str(obj.pk),
-            smart_str(obj.name),
-            smart_str(obj.members.get(mi_number=obj.name).name),
-            smart_str(obj.members.get(mi_number=obj.name).email),
-            smart_str(obj.mobile_number),
+            smart_str(obj.leader.mi_number),
+            smart_str(obj.leader.name),
+            smart_str(obj.leader.email),
+            smart_str(obj.leader.mobile_number),
             smart_str(obj.present_college),
             smart_str(obj.present_city),
             smart_str(obj.event),
+            smart_str(obj.multicity),
         ])
         for member in obj.members.all():
             writer.writerow([
@@ -42,6 +45,37 @@ def export_csv(modeladmin, request, queryset):
 
 export_csv.short_description = u"Export CSV"
 
+
+def export_exl(modeladmin, request, queryset):
+    import csv
+    from django.utils.encoding import smart_str
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename=mymodel.csv'
+    writer = csv.writer(response, csv.excel)
+    response.write(u'\ufeff'.encode('utf8'))
+    writer.writerow([
+            smart_str(u"Name"),
+            smart_str(u"MI-Number"),
+            smart_str(u"Email"),
+            smart_str(u"CR referral code"),
+            smart_str(u"Phone Number"),
+            smart_str(u"College"),
+            smart_str(u"City"),
+        ])
+    for obj in queryset:
+        writer.writerow([
+                smart_str(obj.name),
+                smart_str(obj.mi_number),
+                smart_str(obj.email),
+                smart_str(obj.cr_referral_code),
+                smart_str(obj.mobile_number),
+                smart_str(obj.present_college),
+                smart_str(obj.present_city),
+            ])
+    return response
+
+export_exl.short_description=u"Export CSV"
+
 def checkin(modeladmin, request, queryset):
     print (queryset)
     for q in queryset:
@@ -54,10 +88,11 @@ class UserProfileAdmin(admin.ModelAdmin):
     list_display = ('name', 'mobile_number', 'present_college', 'present_city', 'checkedin')
     search_fields = ['name',
                      'present_city__city_name',
-                     'present_college__college_name']
+                     'present_college__college_name',
+                     'mi_number']
     list_filter = ['present_city',
                    'present_college']
-    actions = (checkin,)
+    actions = (checkin,export_exl,)
 
 
 class MembersInline(admin.TabularInline):

@@ -3,11 +3,13 @@ from .serializers import UserGetSerializer, UserSerializer
 from .serializers import CitySerializer, CollegeSerializer, GroupSerializer
 from django.shortcuts import get_list_or_404, get_object_or_404
 from competitions.models import CompetitionsEvent
-from django.http import Http404
+from django.http import Http404, JsonResponse
+from django.core.mail import send_mail
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 import unidecode
+from django.template import loader
 import requests, json
 
 
@@ -41,7 +43,7 @@ class getuser(APIView):
 
     def get(self, request, google_id, format=None):
         user = self.get_object(google_id)
-        serializer = UserGetSerializer(user)
+        serializer = UserSerializer(user)
         return Response(serializer.data)
 
 
@@ -56,7 +58,7 @@ class check(APIView):
         user = self.get_object(google_id)
         user.checkedin = 1
         user.save()
-        serializer = UserGetSerializer(user)
+        serializer = UserSerializer(user)
         return Response(serializer.data)
 
 
@@ -100,15 +102,45 @@ class createuser(APIView):
             sortedtemp.reverse()
             end = str(int(sortedtemp[0].mi_number[7:]) + 1)
         info['mi_number'] = beg + end
+
         #increase CR's score if any
-        #URL = "https://api.moodi.org/my_cr/"
-        #data = {'referral_code':info['cr_referral_code']}
-        #r = requests.post(URL, data=data)
+        URL = "https://api.moodi.org/my_cr/"
+        data = {'referral_code':info['cr_referral_code'], 'score':'10'}
+        r = requests.post(URL, data=data)
         #print(r.json())
 
         serializer = UserSerializer(data=info)
         if serializer.is_valid():
             serializer.save()
+
+            send_mail('Congratulations! Registration for Mood Indigo 2k18 successful!',
+                '',
+                'Mood Indigo <publicrelations@moodi.org>', [info['email']], fail_silently=True, html_message='''<!DOCTYPE html>
+
+                <html>
+                <head></head>
+                <body>
+                <p>Greetings from Mood Indigo!</p>
+
+                <p>Congratulations on successfully registering for <b>Mood Indigo 2k18!</b><br/>
+                Come to the City of Dreams this December and witness the most amazing performances from all across the world. A plethora of events awaits you where you will never be able to see it all. But what you see, will last a lifetime!</p>
+
+                <p>Join us for the 48th edition of Mood Indigo from <b>27th December - 30th December!</b></p>
+
+                <p><b>Your registration number is ''' + info['mi_number'] + ''' </b></p>
+
+                <p>Looking forward to having you here at Mood Indigo!</p>
+
+                <p>For any queries, visit our website - <a href="https://moodi.org">https://moodi.org</a><br/>
+                For updates, follow us on <a href="https://www.facebook.com/iitb.moodindigo/">Facebook</a>, <a href="https://www.instagram.com/iitbombay.moodi/">Instagram</a> and <a href="https://twitter.com/iitb_moodi">Twitter</a>.
+                </p>
+
+                </body>
+                </html>
+
+'''
+                )
+
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -175,6 +207,12 @@ class aid(APIView):
         return Response(my_list)
 
 
+class leader_name(APIView):
+    def get(self, request, mi_number):
+        user=get_object_or_404(UserProfile.objects, mi_number=mi_number);
+        data={'leader_name':user.name}
+        return JsonResponse(data)
+
 class my_team(APIView):
     
     def get(self, request, google_id, format=None):
@@ -220,11 +258,9 @@ class add_member(APIView):
 class is_leader(APIView):
     def get(self, request, google_id, format=None):
         info = request.GET
-        return Response({
-            "response": Group.objects.filter(
-                event__id=info["event"],
-                leader__google_id=google_id
-            ).exists()})
+        team = get_object_or_404(Group.objects, leader__google_id=google_id, event__id=info["event"])
+        serializer = GroupSerializer(team)
+        return Response(serializer.data)
         
 class exit_team(APIView):
 
@@ -264,11 +300,11 @@ class create_team(APIView):
         # Create a team
         my_team = Group.objects.create(
                 name=info["team_name"],
-                mobile_number=leader.mobile_number,
+                mobile_number=info["mobile_number"],
                 event=event,
                 present_city=leader.present_city,
                 present_college=leader.present_college,
-                leader=leader)
-
+                leader=leader,
+                multicity=info["multicity"])
         return Response(GroupSerializer(my_team).data)
 
