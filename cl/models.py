@@ -15,8 +15,11 @@ class ContingentLeader(models.Model):
                                      blank=False)
     iscrcurrently = models.CharField(max_length=3,
                                      blank=False)
-    timesmiattended = models.IntegerField(blank=False)
+    timesmiattended = models.CharField(max_length=1, blank=False)
     nocpiclink = models.TextField()
+    college = models.CharField(max_length=200, default='NULL', blank=False)
+    city = models.CharField(max_length=20, default='NULL', blank=False)
+    year_of_study = models.CharField(max_length=6, default='NULL', blank=False)
 
     class Meta:
         ordering = ['-id']

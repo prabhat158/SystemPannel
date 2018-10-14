@@ -299,7 +299,7 @@ class create_team(APIView):
 
         # Create a team
         my_team = Group.objects.create(
-                name=info["team_name"],
+                name=leader.name,
                 mobile_number=info["mobile_number"],
                 event=event,
                 present_city=leader.present_city,

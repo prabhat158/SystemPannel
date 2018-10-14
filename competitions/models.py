@@ -18,6 +18,7 @@ class CompetitionsEvent(models.Model):
     LYP_description = models.TextField(blank=True)
     LYP_logo = models.ImageField(upload_to='photos/', blank=True)
     LYP_partner = models.CharField(max_length=100, blank=True)
+    status = models.TextField(max_length=10, blank=True)
     description = models.TextField()
     rules = models.TextField()
     prizes = models.TextField()

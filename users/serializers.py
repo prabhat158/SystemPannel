@@ -16,7 +16,7 @@ class UserGetSerializer(serializers.ModelSerializer):
         model = UserProfile
         fields = ("name", "google_id", "mi_number", "email", "mobile_number","gender",
                   "present_city", "present_college","permanent_address",
-                  "postal_address", "zip_code", "year_of_study","get_cl_name","get_cl_mail","get_cl_number")
+                  "postal_address", "zip_code", "year_of_study",)
 
 
 class UserSerializer(serializers.ModelSerializer):

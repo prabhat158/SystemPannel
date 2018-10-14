@@ -3,9 +3,21 @@ from competitions.models import CompetitionsEvent
 from workshops.models import WorkshopsEvent
 
 
+class ActualCity(models.Model):
+    city_name = models.CharField(max_length=100)
+    def __str__(self):
+        return self.city_name
+
+class ActualCollege(models.Model):
+    college_name = models.CharField(max_length=300)
+    city = models.ForeignKey(ActualCity, blank=True, null=True, on_delete=models.CASCADE)
+    assignedcl = models.ForeignKey('UserProfile', blank=True, null=True, on_delete=models.CASCADE)
+    def __str__(self):
+        return self.college_name
+
 class City(models.Model):
     city_name = models.CharField(max_length=100)
-
+    actual_city = models.ForeignKey(ActualCity, blank=True, null=True, on_delete=models.CASCADE)
     def __str__(self):
         return self.city_name
 
@@ -13,10 +25,9 @@ class City(models.Model):
 class College(models.Model):
     college_name = models.CharField(max_length=300)
     located_city = models.ForeignKey(City, on_delete=models.CASCADE)
-    assignedcl = models.ForeignKey('UserProfile', blank = True, null = True, on_delete=models.CASCADE)
+    actual_college = models.ForeignKey(ActualCollege, blank=True, null=True, on_delete=models.CASCADE)
     def __str__(self):
         return self.college_name
-
 
 class UserProfile(models.Model):
     YEAR = ['First',
@@ -91,7 +102,7 @@ class UserProfile(models.Model):
     def getName(self):
         return self.name
 
-    def get_cl_name(self):
+    '''def get_cl_name(self):
         cl = self.present_college.assignedcl
         if(cl is None):
             return None
@@ -112,7 +123,7 @@ class UserProfile(models.Model):
             return None
         else:
             return cl.mobile_number
-    get_cl_name.short_description = u"CL number"
+    get_cl_name.short_description = u"CL number"'''
 
 
 class Group(models.Model):

@@ -4,18 +4,31 @@ from rest_framework.response import Response
 from rest_framework import status
 from users.models import UserProfile
 from .models import ContingentLeader, Contingent, ContingentMember#,Contingent
-from django.http import Http404
-
+from django.http import Http404, JsonResponse
+from django.shortcuts import get_object_or_404
 
 class createcl(APIView):
     def post(self, request, format=None):
         info = request.data
-        try:
-            info['clprofile'] = UserProfile.objects.get(mi_number=info['mi_number']).id
-        except:
-            return Response({"details": "MI Number Invalid"},
-                            status=status.HTTP_400_BAD_REQUEST)
-        serializer = ContingentLeaderSerializer(data=info)
+        #try:
+            #info['clprofile'] = UserProfile.objects.get(mi_number=info['mi_number'])
+        #except UserProfile.DoesNotExist:
+            #return Response({"details": "MI Number Invalid"},
+                            #status=status.HTTP_400_BAD_REQUEST)
+        cl= get_object_or_404(UserProfile.objects, mi_number=info['mi_number'])
+        
+        inf={
+                'clprofile':cl.id,
+                'college':info['college'],
+                'por':info['por'],
+                'wascllastyear':info['wascllastyear'],
+                'iscrcurrently':info['iscrcurrently'],
+                'timesmiattended':info['timesmiattended'],
+                'nocpiclink':info['nocpiclink'],
+                'year_of_study':info['year_of_study'],
+                'city':info['city']
+                }
+        serializer = ContingentLeaderSerializer(data=inf)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -27,19 +40,19 @@ class checkcl(APIView):
         try:
             user = UserProfile.objects.get(mi_number=info['username'])
         except UserProfile.DoesNotExist:
-            raise Http404
+            return JsonResponse({'error':'User does not exist'})
         except KeyError:
             raise Http404
         try:
-            cl = Contingent.objects.get(cl=user.pk)
+            cl = ContingentLeader.objects.get(cl=user.id)
         except Contingent.DoesNotExist:
-            raise Http404
+            return JsonResponse({'error':user.id})
         try:
-            if(info['password']==user.fb_id):
+            if(info['password']==user.google_id):
                 serializer = GetContingentSerializer(cl)
                 return Response(serializer.data)
             else:
-                return Http404
+                return JsonResponse({'error':'Password is wrong'})
         except KeyError:
             raise Http404
 

@@ -60,7 +60,9 @@ def export_exl(modeladmin, request, queryset):
             smart_str(u"CR referral code"),
             smart_str(u"Phone Number"),
             smart_str(u"College"),
+            smart_str(u"Pincode"),
             smart_str(u"City"),
+            smart_str(u"Gender"),
         ])
     for obj in queryset:
         writer.writerow([
@@ -70,7 +72,9 @@ def export_exl(modeladmin, request, queryset):
                 smart_str(obj.cr_referral_code),
                 smart_str(obj.mobile_number),
                 smart_str(obj.present_college),
+                smart_str(obj.zip_code),
                 smart_str(obj.present_city),
+                smart_str(obj.gender),
             ])
     return response
 
@@ -90,8 +94,9 @@ class UserProfileAdmin(admin.ModelAdmin):
                      'present_city__city_name',
                      'present_college__college_name',
                      'mi_number']
-    list_filter = ['present_city',
-                   'present_college']
+    #list_filter = ['present_city',
+    #               'present_college']
+
     actions = (checkin,export_exl,)
 
 
