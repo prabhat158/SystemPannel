@@ -3,6 +3,8 @@ from . import views
 
 urlpatterns = [
     url(r'^user/(?P<google_id>[0-9]+)', views.getuser.as_view()),
+    url(r'^user/(?P<mi_no>MI-[a-z,A-Z]{2,3}-[0-9]{3,4})', views.get_mino),
+    url(r'^user/get', views.get_user.as_view()),
     url(r'^user/check/(?P<google_id>[0-9]+)', views.check.as_view()),
     url(r'^user/create', views.createuser.as_view()),
     url(r'^team/add/(?P<google_id>[0-9]+)', views.add_member.as_view()),

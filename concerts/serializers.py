@@ -5,7 +5,7 @@ from .models import ConcertsGenre, ConcertsEvent
 class ConcertsEventSerializer(serializers.ModelSerializer):
     class Meta:
         model = ConcertsEvent
-        fields = ('name', 'description', 'subtitle')
+        fields = ('name', 'description', 'image', 'link')
 
 
 class ConcertsGenreSerializer(serializers.ModelSerializer):
@@ -13,4 +13,4 @@ class ConcertsGenreSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ConcertsGenre
-        fields = ('name', 'description', 'events', 'image')
+        fields = ('name', 'description', 'events')

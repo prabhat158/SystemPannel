@@ -1,7 +1,7 @@
 from django.db import models
 from competitions.models import CompetitionsEvent
 from workshops.models import WorkshopsEvent
-
+from proshows.models import ProshowsEvent
 
 class ActualCity(models.Model):
     city_name = models.CharField(max_length=100)
@@ -155,9 +155,10 @@ class Group(models.Model):
     get_mail.admin_order_field = 'name'
 
 class WorkshopParticipant(models.Model):
-    participant = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
-    event = models.ForeignKey(WorkshopsEvent, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)
+    mobile_number = models.CharField(max_length=10)
+    event = models.ForeignKey(ProshowsEvent, on_delete=models.CASCADE)
     class Meta:
         ordering = ['-id']
     def __str__(self):
-        return self.participant.name
+        return self.name

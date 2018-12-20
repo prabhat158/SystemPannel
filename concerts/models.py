@@ -17,6 +17,7 @@ class ConcertsEvent(models.Model):
                               on_delete=models.CASCADE)
     description = models.TextField()
     subtitle = models.CharField(max_length=100)
-
+    image = models.CharField(max_length=100, blank=True)
+    link = models.CharField(max_length=100, blank=True)
     def __str__(self):
         return self.name

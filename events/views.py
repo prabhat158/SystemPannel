@@ -14,7 +14,7 @@ from competitions.serializers import CompetitionsEventSerializer
 from users.serializers import GroupSerializer, WorkshopParticipantSerializer
 
 from competitions.models import CompetitionsGenre, CompetitionsEvent
-from proshows.models import ProshowsGenre
+from proshows.models import ProshowsGenre, ProshowsEvent
 from workshops.models import WorkshopsGenre, WorkshopsEvent
 from concerts.models import ConcertsGenre
 from informals.models import InformalsGenre
@@ -97,7 +97,18 @@ class Workshopreg(APIView):
     def post(self, request, event_id, format=None):
 
         info = request.data
-        applicant = info['applicant']
+        applicant = info
+        try:
+            applicant['event']= ProshowsEvent.objects.get(pk=event_id).id
+            '''applicant['event'] = event'''
+        except:
+            return Response({"details": "Event invalid"},status=status.HTTP_400_BAD_REQUEST)
+        participant = WorkshopParticipantSerializer(data=applicant)
+        if participant.is_valid():
+            participant.save()
+            return Response({"details": "Your Registration has been taken into consideration"},status=status.HTTP_201_CREATED)
+        return Response({"details": "Mobile Number/Name is incorrect"},status=status.HTTP_400_BAD_REQUEST)
+        '''applicant = info['applicant']
 
         try:
             info['event'] = WorkshopsEvent.objects.get(pk=event_id).id
@@ -129,7 +140,7 @@ class Workshopreg(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)'''
 
 
 

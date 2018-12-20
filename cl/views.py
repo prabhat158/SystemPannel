@@ -1,11 +1,52 @@
-from .serializers import ContingentLeaderSerializer, GetContingentSerializer, ContingentSerializer#, ContingentSerializer, GetContingentSerializer, ApprovedSerializer
+from .serializers import VisitSerializer, ContingentLeaderSerializer, GetContingentSerializer, ContingentSerializer, CollegeSerializer, ContingentMemberSerializer#, ContingentSerializer, GetContingentSerializer, ApprovedSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from users.models import UserProfile
-from .models import ContingentLeader, Contingent, ContingentMember#,Contingent
+from users.serializers import UserSerializer
+from .models import Visits, ContingentLeader, Contingent, ContingentMember, College#,Contingent
 from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404
+
+class colleges(APIView):
+
+    def get(self,request, pin_code, *args, **kwargs):
+        #colleges = College.objects.all().order_by('name')
+        colleges = College.objects.filter(pin_code=pin_code)
+        serializer = CollegeSerializer(colleges, many=True)
+        return Response(serializer.data)
+
+class visit(APIView):
+    def delete_extra(self, user):
+        if Visits.objects.filter(visitor=user):
+            inst = Visits.objects.filter(visitor=user).first()
+            inst.delete()
+        return
+
+    def post(self, request, google_id):
+        info=request.data
+        inf={}
+        inf["pin_code"]=info["pin_code"]
+        inf["visitor"]= get_object_or_404(UserProfile.objects, google_id=google_id).id
+        inf["gender"] = info["gender"]
+        '''if(Visits.objects.get(visitor=inf["visitor"])
+            Visits.objects.filter(visitor__mi_number=inf["visitor"].mi_number)[0].delete()'''
+        self.delete_extra(inf["visitor"])
+        
+        serializer= VisitSerializer(data=inf)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def get(self, request, google_id, *args, **kwargs):
+        visitor = get_object_or_404(UserProfile.objects, google_id=google_id).id 
+        visit = get_object_or_404(Visits.objects, visitor=visitor)
+        serializer = VisitSerializer(visit)
+        return Response(serializer.data)
+        '''if serializer.is_valid():
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)'''
 
 class createcl(APIView):
     def post(self, request, format=None):
@@ -44,7 +85,7 @@ class checkcl(APIView):
         except KeyError:
             raise Http404
         try:
-            cl = ContingentLeader.objects.get(cl=user.id)
+            cl = Contingent.objects.get(cl=user.id)
         except Contingent.DoesNotExist:
             return JsonResponse({'error':user.id})
         try:
@@ -56,10 +97,75 @@ class checkcl(APIView):
         except KeyError:
             raise Http404
 
-class createandeditcontingent(APIView):
-    def get_object(self, fb_id):
+class createmember(APIView):
+    def get_or_add_member(self, user, college, gender, cont):
         try:
-            return UserProfile.objects.get(fb_id=fb_id)
+            member = ContingentMember.objects.get(profile=user)
+            member.contingent_set.clear()
+            member.gender = gender
+            member.college = college
+            member.save()
+            cont.contingent_members.add(member)
+            cont.save()
+            return member
+        except ContingentMember.DoesNotExist:
+            member = ContingentMember.objects.create(profile=user, gender=gender, college=college)
+            cont.contingent_members.add(member)
+            cont.contingent_strength += 1
+            if(gender=="Male"):
+                cont.m_strength += 1
+            else:
+                cont.f_strength += 1
+            cont.save()
+            return member
+
+    def post(self, request, google_id):
+        info=request.data
+        user = get_object_or_404(UserProfile.objects, google_id=google_id)
+        college = get_object_or_404(College.objects, name=info["college"])
+        contingent = get_object_or_404(Contingent.objects, college=college)
+        new_member = self.get_or_add_member(user, college, info["gender"], contingent)
+        
+        
+        serializer = ContingentMemberSerializer(new_member)
+        return Response(serializer.data)
+
+    def get(self, request, google_id):
+        user = get_object_or_404(UserProfile.objects, google_id=google_id)
+        member = get_object_or_404(ContingentMember.objects, profile=user)
+        serializer = ContingentMemberSerializer(member)
+        return Response(serializer.data)
+
+class getcl(APIView):
+    def get(self, request, google_id):
+        user = get_object_or_404(UserProfile.objects, google_id=google_id)
+        member = get_object_or_404(ContingentMember.objects, profile=user)
+        college = member.college
+        contingent = get_object_or_404(Contingent.objects, college=college)
+        #leader = get_object_or_404(UserProfile.objects, pk=contingent.cl)
+        leader = contingent.cl
+        serializer=UserSerializer(leader)
+        return Response(serializer.data)
+class getcl_college(APIView):
+    def post(self, request):
+        info = request.data
+        college = get_object_or_404(College.objects, name=info["college"])
+        contingent = get_object_or_404(Contingent.objects, college=college)
+        leader = contingent.cl
+        serializer=UserSerializer(leader)
+        return Response(serializer.data)
+class getcollege(APIView):
+    def get(self, request, google_id):
+        user = get_object_or_404(UserProfile.objects, google_id=google_id)
+        member = get_object_or_404(ContingentMember.objects, profile=user)
+        college = member.college
+        serializer = CollegeSerializer(college)
+        return Response(serializer.data)
+
+class createandeditcontingent(APIView):
+    def get_object(self, google_id):
+        try:
+            return UserProfile.objects.get(google_id=google_id)
         except UserProfile.DoesNotExist:
             raise Http404
 
@@ -69,31 +175,55 @@ class createandeditcontingent(APIView):
         except Contingent.DoesNotExist:
             raise Http404
 
-    def get_or_create_member(self, userprofile):
+    def get_or_create_member(self, userprofile, gender, cl_approve, college):
         try:
             print('exists')
-            return ContingentMember.objects.get(profile=userprofile).id
+            member=ContingentMember.objects.get(profile=userprofile)
+            member.gender = gender
+            member.cl_approve = cl_approve
+            member.college = college
+            member.save()
+            return member.id
         except ContingentMember.DoesNotExist:
             print('creating')
-            return ContingentMember.objects.create(profile=userprofile).id
-    
-    def post(self, request, fb_id, format=None):
-        user = self.get_object(fb_id)
+            try:
+                return ContingentMember.objects.create(profile=userprofile, gender=gender, cl_approve=0, college=college).id
+            except KeyError:
+                return ContingentMember.objects.create(profile=userprofile, gender=gender, cl_approve=0, college=college).id
+
+    def post(self, request, google_id, format=None):
+        user = self.get_object(google_id)
         contingent = self.get_contingent(user.pk)
         info = {}
         info["members"] = request.data["members"]
         print(info)
         members = info["members"]
         info['contingent_members'] = []
+        info['m_strength'] = 0
+        info['f_strength'] = 0
 
         for member in members:
-            try:
+            '''try:
                 temp = UserProfile.objects.get(mi_number=member)
+                print(here1)
                 memberid=self.get_or_create_member(temp)
+                print(here2)
                 info['contingent_members'].append(memberid)
             except:
-                return Response({"details": "MI Number invalid"},
-                                status=status.HTTP_400_BAD_REQUEST)
+                return Response({"details": "MI Number invali1d"},
+                                status=status.HTTP_400_BAD_REQUEST)'''
+            temp = get_object_or_404(UserProfile.objects, mi_number=member["mi_number"])
+            '''try:
+                memberid = self.get_or_create_member(temp)
+            except:
+                return Response({"details": "MI Number invali1d"},
+                                status=status.HTTP_400_BAD_REQUEST)'''
+            memberid = self.get_or_create_member(temp, member["gender"], member["cl_approve"], contingent.college)
+            if(member["gender"]=="Male"):
+                info['m_strength'] += 1
+            else:
+                info['f_strength'] += 1
+            info['contingent_members'].append(memberid)
 
         info['cl'] = user.id
         info['contingent_strength'] = len(members)
@@ -105,9 +235,9 @@ class createandeditcontingent(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class selectmembers(APIView):
-    def get_object(self, fb_id):
+    def get_object(self, google_id):
         try:
-            return UserProfile.objects.get(fb_id=fb_id)
+            return UserProfile.objects.get(google_id=google_id)
         except UserProfile.DoesNotExist:
             raise Http404
 
@@ -125,15 +255,21 @@ class selectmembers(APIView):
             print('creating')
             raise Http404
     
-    def post(self, request, fb_id, format=None):
-        user = self.get_object(fb_id)
+    def post(self, request, google_id, format=None):
+        user = self.get_object(google_id)
         contingent = self.get_contingent(user.pk)
         members = request.data["members"]
         actualmembers = contingent.contingent_members.all()
-        print(actualmembers)
+        #print(actualmembers)
+        contingent.selected_m=0
+        contingent.selected_f=0
         for member in actualmembers:
             if member.get_mi_number() in members:
                 member.is_selected = 1
+                if(member.gender=="Male"):
+                    contingent.selected_m +=1
+                if(member.gender=="Female"):
+                    contingent.selected_f +=1
                 member.save()
             else:
                 member.is_selected = 0
@@ -149,9 +285,9 @@ class selectmembers(APIView):
 
 
 class approvedminumbers(APIView):
-    def get_object(self, fb_id):
+    def get_object(self, google_id):
         try:
-            return UserProfile.objects.get(mi_number=fb_id)
+            return UserProfile.objects.get(mi_number=google_id)
         except UserProfile.DoesNotExist:
             raise Http404
 
@@ -168,6 +304,14 @@ class approvedminumbers(APIView):
         if member.is_selected==1:
             return Response({"detail":True})
         else:
+            return Response({"detail":False})
+
+class approvedcl(APIView):
+    def get(self, request, mi_number, format=None):
+        try:
+            cont = Contingent.objects.filter(cl__mi_number=mi_number)[0]
+            return Response({"detail":True})
+        except:
             return Response({"detail":False})
 
 class updatepaidlist(APIView):

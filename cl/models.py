@@ -3,6 +3,24 @@ from users.models import UserProfile, College, City
 
 
 # Create your models here.
+
+class Visits(models.Model):
+    visitor = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    pin_code = models.IntegerField(blank=False)
+    gender = models.CharField(max_length=6, default=None)
+    def __str__(self):
+        return self.visitor.mi_number
+
+
+class College(models.Model):
+    name = models.CharField(max_length=200, blank=False)
+    pin_code = models.IntegerField(blank=False)
+    def __str__(self):
+        return self.name
+
+    def pin(self):
+        return self.pin_code
+
 class ContingentLeader(models.Model):
 
     # Name
@@ -33,9 +51,9 @@ class ContingentLeader(models.Model):
     get_mi_number.admin_order_field = 'clprofile__mi_number'
 
     def get_college(self):
-        return self.clprofile.present_college.college_name
+        return self.college
     get_college.short_description = u"College"
-    get_college.admin_order_field = 'clprofile__present_college__college_name'
+    get_college.admin_order_field = 'college_name'
 
 '''
 class Contingent(models.Model):
@@ -68,7 +86,9 @@ class ContingentMember(models.Model):
     is_selected = models.IntegerField(blank=False, default=0)
     is_imp = models.IntegerField(blank=False, default=0)
     has_paid = models.IntegerField(blank=False, default=0)
-
+    gender = models.CharField(blank=False, max_length=6, default=None)
+    cl_approve = models.IntegerField(blank=False, default=0)
+    college = models.ForeignKey(College, null=True, on_delete=models.CASCADE)
     def __str__(self):
         return self.profile.name
 
@@ -97,12 +117,19 @@ class ContingentMember(models.Model):
 class Contingent(models.Model):
 
     cl = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    college = models.ForeignKey(College, null=True, on_delete=models.CASCADE)
     comments = models.TextField(blank=True)
     contingent_members = models.ManyToManyField(ContingentMember, blank=True)
     contingent_strength = models.IntegerField(blank=False, default=0)
+    m_strength = models.IntegerField(blank=False, default=0)
+    f_strength = models.IntegerField(blank=False, default=0)
     selected_contingent_strength = models.IntegerField(blank=False, default=0)
+    selected_m = models.IntegerField(blank=False, default=0)
+    selected_f = models.IntegerField(blank=False, default=0)
     is_equal = models.IntegerField(blank=False, default=0)
     strength_alloted = models.IntegerField(blank=False, default=-1)
+    male_alloted = models.IntegerField(blank=False, default=0)
+    fem_alloted = models.IntegerField(blank=False, default=0)
     is_approved = models.IntegerField(blank=False, default=0)
     class Meta:
         ordering = ['-id']
@@ -123,14 +150,14 @@ class Contingent(models.Model):
 
 
     def get_cl_pass(self):
-        return self.cl.fb_id
+        return self.cl.google_id
     get_cl_pass.short_description = u"Password"
-    get_cl_pass.admin_order_field = 'cl__fb_id'
+    get_cl_pass.admin_order_field = 'cl__google_id'
 
     def get_cl_college(self):
-        return self.cl.present_college.college_name
+        return self.college.name
     get_cl_college.short_description = u"College"
-    get_cl_college.admin_order_field = 'cl__present_college__college_name'
+    get_cl_college.admin_order_field = 'college__name'
 
     def get_cl_city(self):
         return self.cl.present_city.city_name

@@ -16,6 +16,7 @@ class CompetitionsEvent(models.Model):
                               related_name='events',
                               on_delete=models.CASCADE)
     LYP_description = models.TextField(blank=True)
+    LYP_img = models.CharField(max_length=30, blank=True)
     LYP_logo = models.ImageField(upload_to='photos/', blank=True)
     LYP_partner = models.CharField(max_length=100, blank=True)
     status = models.TextField(max_length=10, blank=True)

@@ -6,7 +6,7 @@ class ProshowsEventSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ProshowsEvent
-        fields = ('name', 'description', 'subtitle')
+        fields = ('name', 'description', 'image')
 
 
 class ProshowsGenreSerializer(serializers.ModelSerializer):

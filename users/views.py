@@ -11,7 +11,7 @@ from rest_framework import status
 import unidecode
 from django.template import loader
 import requests, json
-
+from rest_framework.decorators import api_view
 
 class cities(APIView):
 
@@ -46,6 +46,18 @@ class getuser(APIView):
         serializer = UserSerializer(user)
         return Response(serializer.data)
 
+@api_view(['POST',])
+def get_mino(request, mi_no, format=None):
+    if 'secret' in request.data and request.data['secret'] == 'mimi123':
+        user = get_object_or_404(UserProfile.objects, mi_number=mi_no)
+        return Response(UserSerializer(user).data)
+    return Response(status=403)
+class get_user(APIView):
+    def post(self, request): 
+        mi_num = request.data['mi_number']
+        user = get_object_or_404(UserProfile.objects, mi_number=mi_num)
+        serializer = UserSerializer(user)
+        return Response(serializer.data)
 
 class check(APIView):
     def get_object(self, google_id):
