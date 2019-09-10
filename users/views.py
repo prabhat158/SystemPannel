@@ -2,7 +2,7 @@ from .models import UserProfile, City, College, Group
 from .serializers import UserGetSerializer, UserSerializer
 from .serializers import CitySerializer, CollegeSerializer, GroupSerializer
 from django.shortcuts import get_list_or_404, get_object_or_404
-from competitions.models import CompetitionsEvent
+from competitions.models import CompetitionsEvent, MuticityCompetitionsEvent
 from django.http import Http404, JsonResponse
 from django.core.mail import send_mail
 from rest_framework.views import APIView
@@ -12,6 +12,7 @@ import unidecode
 from django.template import loader
 import requests, json
 from rest_framework.decorators import api_view
+
 
 class cities(APIView):
 
@@ -124,33 +125,67 @@ class createuser(APIView):
         serializer = UserSerializer(data=info)
         if serializer.is_valid():
             serializer.save()
-
-            send_mail('Congratulations! Registration for Mood Indigo 2k18 successful!',
+            if info['status'] == 'multicity':
+                send_mail('Welcome to Mood Indigo Multicity Eliminations 2019',
                 '',
                 'Mood Indigo <publicrelations@moodi.org>', [info['email']], fail_silently=True, html_message='''<!DOCTYPE html>
 
                 <html>
                 <head></head>
                 <body>
-                <p>Greetings from Mood Indigo!</p>
-
-                <p>Congratulations on successfully registering for <b>Mood Indigo 2k18!</b><br/>
-                Come to the City of Dreams this December and witness the most amazing performances from all across the world. A plethora of events awaits you where you will never be able to see it all. But what you see, will last a lifetime!</p>
-
-                <p>Join us for the 48th edition of Mood Indigo from <b>27th December - 30th December!</b></p>
-
-                <p><b>Your registration number is ''' + info['mi_number'] + ''' </b></p>
-
-                <p>Looking forward to having you here at Mood Indigo!</p>
-
-                <p>For any queries, visit our website - <a href="https://moodi.org">https://moodi.org</a><br/>
-                For updates, follow us on <a href="https://www.facebook.com/iitb.moodindigo/">Facebook</a>, <a href="https://www.instagram.com/iitbombay.moodi/">Instagram</a> and <a href="https://twitter.com/iitb_moodi">Twitter</a>.
-                </p>
+                <p>Hi ''' + info['name'] + '''
+                <p><b>Greetings from Mood Indigo!</b></p>
+                <p>Welcome to the Multicity Eliminations of Asia's largest college cultural festival!<br/>
+                This year, we are reaching out to more than 10 cities to pick the best of the best to showcase their talent at Mood Indigo:</p>
+                <ul>
+                <li><b>Bangalore -</b> September 1, 2019</li>
+                <li><b>Kolkata -</b> September 8, 2019</li>
+                <li><b>Bhopal -</b> September 26, 2019 - September 29, 2019</li>
+                <li><b>Pune -</b> September 29, 2019</li>
+                <li><b>Nagpur -</b> October 5, 2019 - October 6, 2019; Fest Dates- October 18, 2019 - October 20, 2019</li>
+                <li><b>Delhi -</b> October 12, 2019 - October 13, 2019</li>
+                <li><b>Jaipur -</b> October 18, 2019 - October 20, 2019</li>
+                <li><b>Bhubaneswar -</b> November 8, 2019 - November 10, 2019</li>
+                <li><b>Chandigarh -</b> November 8, 2019 - November 10, 2019</li>
+                <li><b>Mumbai -</b> December 1, 2019</li>
+                </ul>
+                <p>Now that you've registered as a participant of the eliminations, time to go to your city's tab at <a href="https://multicity.moodi.org/">multicity.moodi.org</a> and register for the competitions you want to participate in.<br/>
+                Register at <a href="https://ccp.moodi.org"><b>College Connect Program</b></a> to join Mood Indigo's organising team!
+                </p><br\>
+                Do follow us on <a href="https://www.facebook.com/iitb.moodindigo/">Facebook</a>, <a href="https://www.instagram.com/iitbombay.moodi/">Instagram</a> and <a href="https://twitter.com/iitb_moodi">Twitter</a> for regular updates regarding the eliminations including venues and rules of competitions!<br>All the best for your journey at Mood Indigo! 
+                
 
                 </body>
                 </html>
 
-'''
+                ''')
+            else:
+                send_mail('Congratulations! Registration for Mood Indigo 2k18 successful!',
+                    '',
+                    'Mood Indigo <publicrelations@moodi.org>', [info['email']], fail_silently=True, html_message='''<!DOCTYPE html>
+
+                    <html>
+                    <head></head>
+                    <body>
+                    <p>Greetings from Mood Indigo!</p>
+
+                    <p>Congratulations on successfully registering for <b>Mood Indigo 2k18!</b><br/>
+                    Come to the City of Dreams this December and witness the most amazing performances from all across the world. A plethora of events awaits you where you will never be able to see it all. But what you see, will last a lifetime!</p>
+
+                    <p>Join us for the 48th edition of Mood Indigo from <b>27th December - 30th December!</b></p>
+
+                    <p><b>Your registration number is ''' + info['mi_number'] + ''' </b></p>
+
+                    <p>Looking forward to having you here at Mood Indigo!</p>
+
+                    <p>For any queries, visit our website - <a href="https://moodi.org">https://moodi.org</a><br/>
+                    For updates, follow us on <a href="https://www.facebook.com/iitb.moodindigo/">Facebook</a>, <a href="https://www.instagram.com/iitbombay.moodi/">Instagram</a> and <a href="https://twitter.com/iitb_moodi">Twitter</a>.
+                    </p>
+
+                    </body>
+                    </html>
+
+                    '''
                 )
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -221,7 +256,7 @@ class aid(APIView):
 
 class leader_name(APIView):
     def get(self, request, mi_number):
-        user=get_object_or_404(UserProfile.objects, mi_number=mi_number);
+        user=get_object_or_404(UserProfile.objects, mi_number=mi_number)
         data={'leader_name':user.name}
         return JsonResponse(data)
 
@@ -255,12 +290,12 @@ class add_member(APIView):
         team = get_object_or_404(Group.objects, leader__mi_number=user.mi_number, event__id=info["event_id"])
 
         # checking if the member exist in any other team or is a leader in other group
-        member_present = Group.objects.filter(members__mi_number=info['member_number']).filter(event__id=info["event_id"]).exists()
-        leader_present = Group.objects.filter(leader__mi_number=info['member_number']).filter(event__id=info["event_id"]).exists()
+        member_present = Group.objects.filter(members__mobile_number=info['member_number']).filter(event__id=info["event_id"]).exists()
+        leader_present = Group.objects.filter(leader__mobile_number=info['member_number']).filter(event__id=info["event_id"]).exists()
 
         # Add a new member if all is okay
         if not member_present and not leader_present:
-            new_member = get_object_or_404(UserProfile.objects, mi_number=info["member_number"])
+            new_member = get_object_or_404(UserProfile.objects, mobile_number=info["member_number"])
             team.members.add(new_member)
             team.save()
             serializer = GroupSerializer(team)
@@ -280,8 +315,8 @@ class exit_team(APIView):
         info = request.data
 
         # finding out if the member belongs to a team
-        user = get_object_or_404(UserProfile.objects, mi_number=info["mi_number"])
-        team = get_object_or_404(Group.objects, members__mi_number=info["mi_number"], event__id=info["event_id"])
+        user = get_object_or_404(UserProfile.objects, mobile_number=info["number"])
+        team = get_object_or_404(Group.objects, members__mobile_number=info["number"], event__id=info["event_id"])
 
         # User can remove if leader OR self
         if team.leader.google_id == google_id or user.google_id == google_id:
@@ -299,7 +334,7 @@ class create_team(APIView):
 
         # Get objects
         leader = get_object_or_404(UserProfile.objects, google_id=google_id)
-        event  = get_object_or_404(CompetitionsEvent.objects, id=info["event_id"])
+        event  = get_object_or_404(MuticityCompetitionsEvent.objects, id=info["event_id"])
 
         # Check if already present in a team
         if Group.objects.filter(members__mi_number=leader.mi_number, event=event).exists():
@@ -312,7 +347,7 @@ class create_team(APIView):
         # Create a team
         my_team = Group.objects.create(
                 name=leader.name,
-                mobile_number=info["mobile_number"],
+                mobile_number=leader.mobile_number,
                 event=event,
                 present_city=leader.present_city,
                 present_college=leader.present_college,

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import CompetitionsEvent, CompetitionsGenre
+from .models import CompetitionsEvent, CompetitionsGenre, MuticityCompetitionsEvent
 from users.models import Group
 from django.contrib.admin.views.main import ChangeList
 from django.core.paginator import EmptyPage, InvalidPage, Paginator
@@ -68,3 +68,5 @@ class CompetitionsEventInline(admin.ModelAdmin):
 
 admin.site.register(CompetitionsGenre)
 admin.site.register(CompetitionsEvent)
+
+admin.site.register(MuticityCompetitionsEvent)

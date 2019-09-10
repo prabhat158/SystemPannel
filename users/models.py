@@ -1,5 +1,5 @@
 from django.db import models
-from competitions.models import CompetitionsEvent
+from competitions.models import CompetitionsEvent, MuticityCompetitionsEvent
 from workshops.models import WorkshopsEvent
 from proshows.models import ProshowsEvent
 
@@ -77,7 +77,7 @@ class UserProfile(models.Model):
 
     postal_address = models.CharField(max_length=100,
                                       blank=False)
-    permanent_address = models.CharField(max_length=200, blank=False, default='NULL')
+    permanent_address = models.CharField(max_length=200, null=True, blank=True, default='NULL')
 
     zip_code = models.IntegerField(blank=False)
     gender = models.CharField(blank=False, default='NULL', max_length=7)
@@ -92,7 +92,7 @@ class UserProfile(models.Model):
                                      choices=YEAR_CHOICES)
 
     checkedin = models.IntegerField(default=0)
-
+    
     def __str__(self):
         return self.name
 
@@ -129,8 +129,11 @@ class UserProfile(models.Model):
 class Group(models.Model):
 
     name = models.CharField(max_length=600)
-    event = models.ForeignKey(CompetitionsEvent,
+
+    event = models.ForeignKey(MuticityCompetitionsEvent,
                               on_delete=models.CASCADE)
+    # event = models.ForeignKey(CompetitionsEvent,
+    #                           on_delete=models.CASCADE)
     mobile_number = models.CharField(max_length=10,
                                      blank=False)
     present_city = models.ForeignKey(City,
@@ -153,6 +156,7 @@ class Group(models.Model):
         return self.members.get(mi_number=self.name).email
     get_mail.short_description = 'Email'
     get_mail.admin_order_field = 'name'
+
 
 class WorkshopParticipant(models.Model):
     name = models.CharField(max_length=100)
