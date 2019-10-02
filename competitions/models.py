@@ -21,6 +21,8 @@ class CompetitionsEvent(models.Model):
     LYP_partner = models.CharField(max_length=100, blank=True)
     status = models.TextField(max_length=10, blank=True)
     description = models.TextField()
+    queries = models.TextField(blank=True)
+    winners = models.TextField(blank=True)
     rules = models.TextField()
     prizes = models.TextField()
     minparticipants = models.IntegerField(default=0)

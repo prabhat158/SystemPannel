@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import UserProfile, City, College, Group, WorkshopParticipant
+from .models import UserProfile, City, College, Group, WorkshopParticipant, CollegeList
 from django.http import HttpResponse
 
 def export_csv(modeladmin, request, queryset):
@@ -18,7 +18,9 @@ def export_csv(modeladmin, request, queryset):
         smart_str(u"College"),
         smart_str(u"City"),
         smart_str(u"Event"),
-        smart_str(u"Multicity"),
+        smart_str(u"EventMI"),
+        smart_str(u"Pin Code"),
+        smart_str(u"Year of Study")
     ])
     for obj in queryset:
         writer.writerow([
@@ -30,7 +32,9 @@ def export_csv(modeladmin, request, queryset):
             smart_str(obj.present_college),
             smart_str(obj.present_city),
             smart_str(obj.event),
-            smart_str(obj.multicity),
+            smart_str(obj.eventMI),
+            smart_str(obj.leader.zip_code),
+            smart_str(obj.leader.year_of_study),
         ])
         for member in obj.members.all():
             writer.writerow([
@@ -39,6 +43,12 @@ def export_csv(modeladmin, request, queryset):
                 smart_str(member.name),
                 smart_str(member.email),
                 smart_str(member.mobile_number),
+                smart_str(member.present_college),
+                smart_str(member.present_city),
+                smart_str(" "),
+                smart_str(" "),
+                smart_str(member.zip_code),
+                smart_str(member.year_of_study),
             ])
     return response
 
@@ -63,6 +73,7 @@ def export_exl(modeladmin, request, queryset):
             smart_str(u"Pincode"),
             smart_str(u"City"),
             smart_str(u"Gender"),
+            smart_str(u"Year of Study"),
         ])
     for obj in queryset:
         writer.writerow([
@@ -75,6 +86,7 @@ def export_exl(modeladmin, request, queryset):
                 smart_str(obj.zip_code),
                 smart_str(obj.present_city),
                 smart_str(obj.gender),
+                smart_str(obj.year_of_study),
             ])
     return response
 
@@ -115,8 +127,9 @@ class GroupAdmin(admin.ModelAdmin):
     '''
     filter_horizontal = ('members',)
     list_display = ('__str__', 'leader', 'get_mail', 'mobile_number',
-                    'present_college', 'present_city', 'event')
-    list_filter = ['event',
+                    'present_college', 'present_city', 'event','eventMI')
+    list_filter = ['eventMI',
+                    'event',
                    'present_city__city_name',
                    'present_college__college_name']
     search_fields = ['name']
@@ -126,6 +139,7 @@ class GroupAdmin(admin.ModelAdmin):
 
 admin.site.register(City)
 admin.site.register(College)
+admin.site.register(CollegeList)
 admin.site.register(Group, GroupAdmin)
 admin.site.register(UserProfile, UserProfileAdmin)
 admin.site.register(WorkshopParticipant)

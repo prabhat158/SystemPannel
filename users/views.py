@@ -1,5 +1,5 @@
-from .models import UserProfile, City, College, Group
-from .serializers import UserGetSerializer, UserSerializer
+from .models import UserProfile, City, College, Group, CollegeList
+from .serializers import UserGetSerializer, UserSerializer, CollegeListSerializer
 from .serializers import CitySerializer, CollegeSerializer, GroupSerializer
 from django.shortcuts import get_list_or_404, get_object_or_404
 from competitions.models import CompetitionsEvent, MuticityCompetitionsEvent
@@ -13,6 +13,12 @@ from django.template import loader
 import requests, json
 from rest_framework.decorators import api_view
 
+class collegeslist(APIView):
+
+    def get(self, request, format=None):
+        college = CollegeList.objects.all().order_by('college_name')
+        serializer = CollegeListSerializer(college, many=True)
+        return Response(serializer.data)
 
 class cities(APIView):
 
@@ -149,7 +155,8 @@ class createuser(APIView):
                 <li><b>Chandigarh -</b> November 8, 2019 - November 10, 2019</li>
                 <li><b>Mumbai -</b> December 1, 2019</li>
                 </ul>
-                <p>Now that you've registered as a participant of the eliminations, time to go to your city's tab at <a href="https://multicity.moodi.org/">multicity.moodi.org</a> and register for the competitions you want to participate in.<br/>
+                <p>Now that you've registered as a participant of the eliminations, time to go to your city's tab at <a href="https://multicity.moodi.org/">multicity.moodi.org</a> and register for the competitions you want to participate in.<br/><br/>
+                Your MI number for registering for competitions at the main website is <b>'''+ info['mi_number'] +'''</b> . For taking part in competitions during Mood Indigo, you have to register for them at <a href="https://www.moodi.org">the main website</a>.<br/><br/>
                 Register at <a href="https://ccp.moodi.org"><b>College Connect Program</b></a> to join Mood Indigo's organising team!
                 </p><br\>
                 Do follow us on <a href="https://www.facebook.com/iitb.moodindigo/">Facebook</a>, <a href="https://www.instagram.com/iitbombay.moodi/">Instagram</a> and <a href="https://twitter.com/iitb_moodi">Twitter</a> for regular updates regarding the eliminations including venues and rules of competitions!<br>All the best for your journey at Mood Indigo! 
@@ -160,27 +167,38 @@ class createuser(APIView):
 
                 ''')
             else:
-                send_mail('Congratulations! Registration for Mood Indigo 2k18 successful!',
+                send_mail(' Welcome to Mood Indigo 2019 | Registration Successful',
                     '',
                     'Mood Indigo <publicrelations@moodi.org>', [info['email']], fail_silently=True, html_message='''<!DOCTYPE html>
 
                     <html>
                     <head></head>
                     <body>
-                    <p>Greetings from Mood Indigo!</p>
+                    <p>Hi '''+ info['name'] +''',</p>
 
-                    <p>Congratulations on successfully registering for <b>Mood Indigo 2k18!</b><br/>
-                    Come to the City of Dreams this December and witness the most amazing performances from all across the world. A plethora of events awaits you where you will never be able to see it all. But what you see, will last a lifetime!</p>
+                    <p>Welcome to the world of Mood Indigo, the epitome of incredible human experience: where you can never see it all, but what you see gets etched in your hearts for a lifetime!</p>
 
-                    <p>Join us for the 48th edition of Mood Indigo from <b>27th December - 30th December!</b></p>
+                    <p>Congrats on your successful registration for Mood Indigo 2019!</b></p>
 
-                    <p><b>Your registration number is ''' + info['mi_number'] + ''' </b></p>
+                    <p><b>Your MI Number: ''' + info['mi_number'] + ''' </b></p>
 
-                    <p>Looking forward to having you here at Mood Indigo!</p>
+                    <p>This MI number is unique and is assigned only to you, and is compulsory for entry to all events and activities going on during Mood Indigo.</p>
 
-                    <p>For any queries, visit our website - <a href="https://moodi.org">https://moodi.org</a><br/>
-                    For updates, follow us on <a href="https://www.facebook.com/iitb.moodindigo/">Facebook</a>, <a href="https://www.instagram.com/iitbombay.moodi/">Instagram</a> and <a href="https://twitter.com/iitb_moodi">Twitter</a>.
+                    <p>
+                    Now, in case you’d like to participate in one of Mood Indigo’s highly popular competitions, go over to the <a href="https://www.moodi.org/competitions/">Competition page</a> on the website and register accordingly over there.
+In case of any queries, please visit the <a href="https://www.moodi.org/faqs/">FAQs page</a> on our website.
+If you want to become a part of the organising team of Mood Indigo 2019 and get a chance to win exciting prizes including special internships and VIP passes to concerts of Mood Indigo, 
+become a member of our College Connect Program and register yourself at ccp.moodi.org.
                     </p>
+
+                    <p>
+                    Follow our social media handles (<a href="https://www.facebook.com/iitb.moodindigo/">Facebook</a>, <a href="https://www.instagram.com/iitbombay.moodi/">Instagram</a> at @iitbombay.moodi, <a href="https://twitter.com/iitb_moodi">Twitter</a>, <a href="https://www.youtube.com/channel/UCr-wK3LzQOY8ZiagfxPp4Lg">Youtube</a> and <a href=https://www.linkedin.com/company/mood-indigo/?viewAsMember=true">LinkedIn</a>) to get regular updates regarding all the artists and other launches for Mood Indigo 2019. 
+                    </p>
+
+                    <p><b>See you at Mood Indigo 2019: 26th-29th December, 2019!</b></p>
+
+                    <p>Thanks and regards,<br>
+                    Team Mood Indigo 2019</p>
 
                     </body>
                     </html>
@@ -273,7 +291,11 @@ class my_team(APIView):
             return Response(GroupSerializer(Group.objects.filter(members__mi_number=user.mi_number), many=True).data)
 
         # Get particular group when event is specified
-        team = get_object_or_404(Group.objects, members__mi_number=user.mi_number, event__id=info["event"])
+        if info["multicity"]=='NO':
+            team = get_object_or_404(Group.objects, members__mi_number=user.mi_number, event__id=info["event"])
+        else:
+            team = get_object_or_404(Group.objects, members__mi_number=user.mi_number, eventMI__id=info["event"])
+       
         serializer = GroupSerializer(team)
         return Response(serializer.data)
 
@@ -287,15 +309,25 @@ class add_member(APIView):
         user = get_object_or_404(UserProfile.objects, google_id=google_id)
 
         # checking if the request is made by a leader
-        team = get_object_or_404(Group.objects, leader__mi_number=user.mi_number, event__id=info["event_id"])
+        if info['multicity']=='NO':
+            team = get_object_or_404(Group.objects, leader__mi_number=user.mi_number, eventMI__id=info["eventMI_id"])
 
-        # checking if the member exist in any other team or is a leader in other group
-        member_present = Group.objects.filter(members__mobile_number=info['member_number']).filter(event__id=info["event_id"]).exists()
-        leader_present = Group.objects.filter(leader__mobile_number=info['member_number']).filter(event__id=info["event_id"]).exists()
+            # checking if the member exist in any other team or is a leader in other group
+            member_present = Group.objects.filter(members__mi_number=info['member_number']).filter(eventMI__id=info["eventMI_id"]).exists()
+            leader_present = Group.objects.filter(leader__mi_number=info['member_number']).filter(eventMI__id=info["eventMI_id"]).exists()
+        else:
+            team = get_object_or_404(Group.objects, leader__mi_number=user.mi_number, event__id=info["event_id"])
+
+            # checking if the member exist in any other team or is a leader in other group
+            member_present = Group.objects.filter(members__mobile_number=info['member_number']).filter(event__id=info["event_id"]).exists()
+            leader_present = Group.objects.filter(leader__mobile_number=info['member_number']).filter(event__id=info["event_id"]).exists()
 
         # Add a new member if all is okay
         if not member_present and not leader_present:
-            new_member = get_object_or_404(UserProfile.objects, mobile_number=info["member_number"])
+            if info['multicity']=='NO':
+                new_member = get_object_or_404(UserProfile.objects, mi_number=info["member_number"])
+            else:
+                new_member = get_object_or_404(UserProfile.objects, mobile_number=info["member_number"])
             team.members.add(new_member)
             team.save()
             serializer = GroupSerializer(team)
@@ -305,7 +337,10 @@ class add_member(APIView):
 class is_leader(APIView):
     def get(self, request, google_id, format=None):
         info = request.GET
-        team = get_object_or_404(Group.objects, leader__google_id=google_id, event__id=info["event"])
+        if info['multicity']=='NO':
+            team = get_object_or_404(Group.objects, leader__google_id=google_id, eventMI__id=info["event"])
+        else:
+            team = get_object_or_404(Group.objects, leader__google_id=google_id, event__id=info["event"])
         serializer = GroupSerializer(team)
         return Response(serializer.data)
         
@@ -315,8 +350,12 @@ class exit_team(APIView):
         info = request.data
 
         # finding out if the member belongs to a team
-        user = get_object_or_404(UserProfile.objects, mobile_number=info["number"])
-        team = get_object_or_404(Group.objects, members__mobile_number=info["number"], event__id=info["event_id"])
+        if info['multicity']=='NO':
+            user = get_object_or_404(UserProfile.objects, mi_number=info["number"])
+            team = get_object_or_404(Group.objects, members__mi_number=info["number"], eventMI__id=info["eventMI_id"])
+        else:
+            user = get_object_or_404(UserProfile.objects, mobile_number=info["number"])
+            team = get_object_or_404(Group.objects, members__mobile_number=info["number"], event__id=info["event_id"])
 
         # User can remove if leader OR self
         if team.leader.google_id == google_id or user.google_id == google_id:
@@ -334,24 +373,47 @@ class create_team(APIView):
 
         # Get objects
         leader = get_object_or_404(UserProfile.objects, google_id=google_id)
-        event  = get_object_or_404(MuticityCompetitionsEvent.objects, id=info["event_id"])
 
-        # Check if already present in a team
-        if Group.objects.filter(members__mi_number=leader.mi_number, event=event).exists():
-            return Response({"detail": "User already present in another group"}, status=403)
+        if info["multicity"]=='NO':
+            event  = get_object_or_404(CompetitionsEvent.objects, id=info["eventMI_id"])
 
-        # Check if leading another team
-        if Group.objects.filter(leader=leader, event=event).exists():
-            return Response({"detail": "User already leads another group"}, status=403)
+            # Check if already present in a team
+            if Group.objects.filter(members__mi_number=leader.mi_number, eventMI=event).exists():
+                return Response({"detail": "User already present in another group"}, status=403)
 
-        # Create a team
-        my_team = Group.objects.create(
-                name=leader.name,
-                mobile_number=leader.mobile_number,
-                event=event,
-                present_city=leader.present_city,
-                present_college=leader.present_college,
-                leader=leader,
-                multicity=info["multicity"])
-        return Response(GroupSerializer(my_team).data)
+            # Check if leading another team
+            if Group.objects.filter(leader=leader, eventMI=event).exists():
+                return Response({"detail": "User already leads another group"}, status=403)
+
+            # Create a team
+            my_team = Group.objects.create(
+                    name=leader.name,
+                    mobile_number=leader.mobile_number,
+                    eventMI=event,
+                    present_city=leader.present_city,
+                    present_college=leader.present_college,
+                    leader=leader,
+                    multicity=info["multicity"])
+            return Response(GroupSerializer(my_team).data)
+        else:
+            event  = get_object_or_404(MuticityCompetitionsEvent.objects, id=info["event_id"])
+
+            # Check if already present in a team
+            if Group.objects.filter(members__mi_number=leader.mi_number, event=event).exists():
+                return Response({"detail": "User already present in another group"}, status=403)
+
+            # Check if leading another team
+            if Group.objects.filter(leader=leader, event=event).exists():
+                return Response({"detail": "User already leads another group"}, status=403)
+
+            # Create a team
+            my_team = Group.objects.create(
+                    name=leader.name,
+                    mobile_number=leader.mobile_number,
+                    event=event,
+                    present_city=leader.present_city,
+                    present_college=leader.present_college,
+                    leader=leader,
+                    multicity=info["multicity"])
+            return Response(GroupSerializer(my_team).data)
 

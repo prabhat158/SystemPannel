@@ -3,6 +3,11 @@ from competitions.models import CompetitionsEvent, MuticityCompetitionsEvent
 from workshops.models import WorkshopsEvent
 from proshows.models import ProshowsEvent
 
+class CollegeList(models.Model):
+    college_name = models.CharField(max_length=200)
+    def __str__(self):
+        return self.college_name
+
 class ActualCity(models.Model):
     city_name = models.CharField(max_length=100)
     def __str__(self):
@@ -130,10 +135,10 @@ class Group(models.Model):
 
     name = models.CharField(max_length=600)
 
-    event = models.ForeignKey(MuticityCompetitionsEvent,
+    event = models.ForeignKey(MuticityCompetitionsEvent,blank=True, null=True,
                               on_delete=models.CASCADE)
-    # event = models.ForeignKey(CompetitionsEvent,
-    #                           on_delete=models.CASCADE)
+    eventMI = models.ForeignKey(CompetitionsEvent,blank=True, null=True,
+                              on_delete=models.CASCADE)
     mobile_number = models.CharField(max_length=10,
                                      blank=False)
     present_city = models.ForeignKey(City,
