@@ -8,6 +8,7 @@ class CollegeList(models.Model):
     def __str__(self):
         return self.college_name
 
+
 class ActualCity(models.Model):
     city_name = models.CharField(max_length=100)
     def __str__(self):
