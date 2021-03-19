@@ -4,7 +4,7 @@ Django==2.0.7
 django-appconf==1.0.2
 django-cors-headers==2.4.0
 django-tasker==0.2.58
-djangorestframework==3.8.2
+djangorestframework==3.11.2
 enum34==1.1.6
 gunicorn==19.9.0
 idna==2.7
